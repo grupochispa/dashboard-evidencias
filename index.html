@@ -1,0 +1,769 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard · GranMarquesCheck</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=DM+Mono:wght@500&display=swap" rel="stylesheet">
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans:  ['Plus Jakarta Sans', 'sans-serif'],
+                        mono:  ['DM Mono', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        :root {
+            --navy:    #0b1f35;
+            --navy-2:  #112840;
+            --navy-3:  #1a3a56;
+            --accent:  #0ea5e9;
+            --accent-2:#38bdf8;
+            --surface: #f1f5f9;
+            --card:    #ffffff;
+            --border:  #e2e8f0;
+            --text-1:  #0f172a;
+            --text-2:  #475569;
+            --text-3:  #94a3b8;
+        }
+
+        * { box-sizing: border-box; }
+        body { background: var(--surface); color: var(--text-1); }
+
+        /* ── Shimmer skeleton ── */
+        .skeleton {
+            background: linear-gradient(90deg, #e2e8f0 25%, #f1f5f9 50%, #e2e8f0 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.4s infinite;
+            border-radius: 0.5rem;
+        }
+        @keyframes shimmer {
+            0%   { background-position:  200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        /* ── Card hover ── */
+        .reg-card {
+            transition: transform .18s ease, box-shadow .18s ease;
+            will-change: transform;
+        }
+        .reg-card:hover { transform: translateY(-3px); box-shadow: 0 16px 32px -8px rgba(11,31,53,.13); }
+
+        /* ── Lightbox: never uses Tailwind 'hidden' to avoid display conflict ── */
+        #lightbox {
+            display:         none;
+            align-items:     center;
+            justify-content: center;
+        }
+        #lightbox.lb-open { display: flex; }
+
+        /* ── Fade-in for cards ── */
+        @keyframes fadeUp {
+            from { opacity:0; transform:translateY(12px); }
+            to   { opacity:1; transform:translateY(0); }
+        }
+        .reg-card { animation: fadeUp .35s ease both; }
+
+        /* ── Stagger ── */
+        .reg-card:nth-child(1)  { animation-delay: .02s }
+        .reg-card:nth-child(2)  { animation-delay: .05s }
+        .reg-card:nth-child(3)  { animation-delay: .08s }
+        .reg-card:nth-child(4)  { animation-delay: .11s }
+        .reg-card:nth-child(5)  { animation-delay: .14s }
+        .reg-card:nth-child(6)  { animation-delay: .17s }
+        .reg-card:nth-child(n+7){ animation-delay: .20s }
+
+        /* ── Scrollbar ── */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 99px; }
+
+        /* ── Photo thumb ── */
+        .photo-thumb {
+            transition: transform .15s, opacity .15s;
+        }
+        .photo-thumb:hover { transform: scale(0.94); opacity: .88; }
+
+        /* ── Select arrow ── */
+        select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%2394a3b8'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 10px center; background-size: 16px; padding-right: 2.5rem !important; }
+
+        /* ── Stat counter animation ── */
+        @keyframes pop {
+            0%   { transform: scale(.7); opacity: 0; }
+            70%  { transform: scale(1.08); }
+            100% { transform: scale(1);   opacity: 1; }
+        }
+        .stat-num { animation: pop .4s ease both; }
+    </style>
+</head>
+<body class="font-sans antialiased min-h-screen">
+
+<!-- ════════════════════════════════════════════════════
+     HEADER
+════════════════════════════════════════════════════ -->
+<header style="background:var(--navy);" class="sticky top-0 z-50 shadow-xl">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
+
+        <!-- Logo -->
+        <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-xl flex items-center justify-center" style="background:var(--accent);">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                        d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                </svg>
+            </div>
+            <div class="leading-tight">
+                <p class="text-white font-black text-base tracking-tight">
+                    GranMarques<span style="color:var(--accent-2)">Check</span>
+                </p>
+                <p class="text-xs font-semibold" style="color:#7fb3d3;">Dashboard POP</p>
+            </div>
+        </div>
+
+        <!-- Right side -->
+        <div class="flex items-center gap-3">
+            <span id="lastUpdate" class="hidden sm:block text-xs font-medium" style="color:#7fb3d3;"></span>
+            <button id="btnRefresh" onclick="loadData()"
+                class="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold text-white transition active:scale-95"
+                style="background:var(--navy-3);">
+                <svg id="refreshIcon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                </svg>
+                Actualizar
+            </button>
+        </div>
+    </div>
+</header>
+
+<!-- ════════════════════════════════════════════════════
+     STATS BANNER
+════════════════════════════════════════════════════ -->
+<div style="background:var(--navy-2); border-bottom: 1px solid var(--navy-3);">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-5 grid grid-cols-2 sm:grid-cols-4 gap-4">
+
+        <div class="text-center">
+            <p class="text-xs font-bold uppercase tracking-widest mb-2" style="color:#7fb3d3;">Visitas</p>
+            <p id="statVisitas" class="font-black text-4xl text-white stat-num font-mono">—</p>
+        </div>
+        <div class="text-center">
+            <p class="text-xs font-bold uppercase tracking-widest mb-2" style="color:#7fb3d3;">Promotores</p>
+            <p id="statPromotores" class="font-black text-4xl text-white stat-num font-mono">—</p>
+        </div>
+        <div class="text-center">
+            <p class="text-xs font-bold uppercase tracking-widest mb-2" style="color:#7fb3d3;">Estados</p>
+            <p id="statEstados" class="font-black text-4xl text-white stat-num font-mono">—</p>
+        </div>
+        <div class="text-center">
+            <p class="text-xs font-bold uppercase tracking-widest mb-2" style="color:#7fb3d3;">Fotos</p>
+            <p id="statFotos" class="font-black text-4xl text-white stat-num font-mono">—</p>
+        </div>
+
+    </div>
+</div>
+
+<!-- ════════════════════════════════════════════════════
+     MAIN
+════════════════════════════════════════════════════ -->
+<main class="max-w-7xl mx-auto px-4 sm:px-6 py-6 space-y-5">
+
+    <!-- Material distribution -->
+    <div class="bg-white rounded-2xl p-5 border shadow-sm" style="border-color:var(--border);">
+        <p class="text-xs font-bold uppercase tracking-widest mb-4" style="color:var(--text-3);">Colocación de Material POP</p>
+        <div id="materialStats" class="space-y-3">
+            <div class="skeleton h-6 w-full"></div>
+            <div class="skeleton h-6 w-4/5"></div>
+            <div class="skeleton h-6 w-3/5"></div>
+            <div class="skeleton h-6 w-2/5"></div>
+            <div class="skeleton h-6 w-1/4"></div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="bg-white rounded-2xl p-4 border shadow-sm" style="border-color:var(--border);">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+
+            <!-- Search -->
+            <div class="relative sm:col-span-2 lg:col-span-1">
+                <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none" style="color:var(--text-3);">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                    </svg>
+                </span>
+                <input id="searchInput" type="text" placeholder="Buscar promotor o cliente..."
+                    class="w-full pl-10 pr-4 py-2.5 border rounded-xl text-sm outline-none transition focus:ring-2"
+                    style="border-color:var(--border); focus:ring-color:var(--accent);">
+            </div>
+
+            <!-- Promotor -->
+            <select id="filterPromotor"
+                class="w-full px-4 py-2.5 border rounded-xl text-sm outline-none bg-white appearance-none"
+                style="border-color:var(--border);">
+                <option value="">Todos los promotores</option>
+                <option value="ALEIDY COLINA">Aleidy Colina</option>
+                <option value="DAVID LINARES">David Linares</option>
+                <option value="DIONERGI GUERRERO">Dionergi Guerrero</option>
+                <option value="DIOMIRA ROSALES">Diomira Rosales</option>
+                <option value="EDWIN BRITO">Edwin Brito</option>
+                <option value="GABRIELA PARRA">Gabriela Parra</option>
+                <option value="GILBERT RODRIGUEZ">Gilbert Rodriguez</option>
+                <option value="JESUS FERREIRA">Jesus Ferreira</option>
+                <option value="JORGE VELASQUEZ">Jorge Velasquez</option>
+                <option value="JOSE DEL ROSARIO">Jose Del Rosario</option>
+                <option value="LUIS FLORES">Luis Flores</option>
+                <option value="MARCOS VIDAL">Marcos Vidal</option>
+                <option value="MARIO BIGOTT">Mario Bigott</option>
+                <option value="OWER ABREU">Ower Abreu</option>
+                <option value="PIERO FIGUEROA">Piero Figueroa</option>
+                <option value="RAFAEL GARCÍA">Rafael García</option>
+                <option value="SAULO RIVERO">Saulo Rivero</option>
+                <option value="SURASKY VILLAFAÑA">Surasky Villafaña</option>
+                <option value="TORCOROMA VENCE">Torcoroma Vence</option>
+                <option value="VANESSA VARGAS">Vanessa Vargas</option>
+                <option value="WILMER DUQUE">Wilmer Duque</option>
+                <option value="YINIBER PEREIRA">Yiniber Pereira</option>
+                <option value="YORKEN MAESTRE">Yorken Maestre</option>
+            </select>
+
+            <!-- Estado -->
+            <select id="filterEstado"
+                class="w-full px-4 py-2.5 border rounded-xl text-sm outline-none bg-white appearance-none"
+                style="border-color:var(--border);">
+                <option value="">Todos los estados</option>
+            </select>
+
+            <!-- Material -->
+            <select id="filterMaterial"
+                class="w-full px-4 py-2.5 border rounded-xl text-sm outline-none bg-white appearance-none"
+                style="border-color:var(--border);">
+                <option value="">Todos los materiales</option>
+                <option value="CENEFA">CENEFA</option>
+                <option value="HABLADOR">HABLADOR</option>
+                <option value="AFICHE">AFICHE</option>
+                <option value="DANGLER">DANGLER</option>
+                <option value="ROMPE TRAFICO">ROMPE TRAFICO</option>
+            </select>
+
+        </div>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="flex items-center justify-between gap-3 flex-wrap">
+        <p id="resultsCount" class="text-sm font-semibold" style="color:var(--text-2);">Cargando registros...</p>
+        <div class="flex items-center gap-2">
+            <label class="text-xs font-semibold" style="color:var(--text-3);">Ordenar:</label>
+            <select id="sortBy" onchange="applyFilters()"
+                class="border rounded-xl px-3 py-2 text-sm bg-white outline-none appearance-none"
+                style="border-color:var(--border);">
+                <option value="reciente">Más reciente</option>
+                <option value="antiguo">Más antiguo</option>
+                <option value="promotor">Promotor A→Z</option>
+                <option value="estado">Estado A→Z</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Skeleton (visible mientras carga) -->
+    <div id="loadingSkeleton" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
+        <!-- 6 skeleton cards generadas por JS -->
+    </div>
+
+    <!-- Cards grid (oculto mientras carga) -->
+    <div id="registrosGrid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5" style="display:none;"></div>
+
+    <!-- Empty state -->
+    <div id="emptyState" style="display:none;" class="text-center py-24">
+        <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-4" style="background:#f1f5f9;">
+            <svg class="w-8 h-8" style="color:var(--text-3);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                    d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+        </div>
+        <h3 class="text-lg font-bold mb-1" style="color:var(--text-1);">Sin resultados</h3>
+        <p class="text-sm mb-4" style="color:var(--text-2);">No hay registros que coincidan con los filtros aplicados.</p>
+        <button onclick="resetFilters()"
+            class="text-sm font-bold transition hover:underline" style="color:var(--accent);">
+            Limpiar filtros
+        </button>
+    </div>
+
+</main>
+
+<!-- ════════════════════════════════════════════════════
+     LIGHTBOX
+════════════════════════════════════════════════════ -->
+<div id="lightbox" class="fixed inset-0 z-[200]" style="background:rgba(5,15,28,.96);">
+
+    <!-- Close -->
+    <button onclick="closeLightbox()"
+        class="absolute top-4 right-4 z-10 p-2.5 rounded-full transition hover:scale-110"
+        style="background:rgba(255,255,255,.1);">
+        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+    </button>
+
+    <!-- Counter -->
+    <div id="lbCounter"
+        class="absolute top-4 left-1/2 -translate-x-1/2 z-10 text-white text-xs font-bold px-4 py-1.5 rounded-full font-mono"
+        style="background:rgba(255,255,255,.1);">
+    </div>
+
+    <!-- Prev -->
+    <button id="lbPrev" onclick="lbMove(-1)"
+        class="absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 z-10 p-3 rounded-full transition hover:scale-110"
+        style="background:rgba(255,255,255,.1);">
+        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+        </svg>
+    </button>
+
+    <!-- Image -->
+    <img id="lbImg" src="" alt="Evidencia"
+        class="max-h-[82vh] max-w-[82vw] object-contain rounded-2xl shadow-2xl select-none"
+        style="pointer-events:none;">
+
+    <!-- Next -->
+    <button id="lbNext" onclick="lbMove(1)"
+        class="absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 z-10 p-3 rounded-full transition hover:scale-110"
+        style="background:rgba(255,255,255,.1);">
+        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+        </svg>
+    </button>
+
+    <!-- Info bar -->
+    <div id="lbInfo"
+        class="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 text-white text-xs font-semibold px-5 py-2.5 rounded-xl whitespace-nowrap max-w-xs truncate"
+        style="background:rgba(255,255,255,.1);">
+    </div>
+
+</div>
+
+
+<!-- ════════════════════════════════════════════════════
+     JAVASCRIPT
+════════════════════════════════════════════════════ -->
+<script>
+// ─── Supabase ───────────────────────────────────────────────────────────
+const SUPABASE_URL      = 'https://zgbsrbjtjnozpzxifpua.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpnYnNyYmp0am5venB6eGlmcHVhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQzNjI5MjUsImV4cCI6MjA2OTkzODkyNX0.zHVKe6Ab73PFhQqD3Au94x1Z71hMyRpxE1PCWP8-QTI';
+const { createClient } = window.supabase;
+const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// ─── State ──────────────────────────────────────────────────────────────
+let allData   = [];
+let filtered  = [];
+let lbImages  = [];
+let lbIdx     = 0;
+let lbCaption = '';
+
+// ─── Material palette ───────────────────────────────────────────────────
+const MAT = {
+    'CENEFA':        { chip: '#dbeafe:#1d4ed8', bar: '#3b82f6' },
+    'HABLADOR':      { chip: '#dcfce7:#15803d', bar: '#22c55e' },
+    'AFICHE':        { chip: '#ffedd5:#c2410c', bar: '#f97316' },
+    'DANGLER':       { chip: '#f3e8ff:#7e22ce', bar: '#a855f7' },
+    'ROMPE TRAFICO': { chip: '#fee2e2:#b91c1c', bar: '#ef4444' },
+};
+
+// Avatar palette (consistent per promotor name)
+const AVATAR_PALETTE = [
+    '#0ea5e9','#06b6d4','#10b981','#8b5cf6',
+    '#ec4899','#f59e0b','#ef4444','#3b82f6',
+    '#84cc16','#f97316','#14b8a6','#a855f7',
+];
+
+function nameToColor(name) {
+    let h = 0;
+    for (const c of (name || '')) h = c.charCodeAt(0) + ((h << 5) - h);
+    return AVATAR_PALETTE[Math.abs(h) % AVATAR_PALETTE.length];
+}
+
+// ─── Helpers ────────────────────────────────────────────────────────────
+function getPhotos(r) {
+    // Compatibilidad: soporta fotos_urls (array nuevo) y foto_url (texto antiguo)
+    if (r.fotos_urls && r.fotos_urls.length > 0) return r.fotos_urls;
+    if (r.foto_url) return [r.foto_url];
+    return [];
+}
+
+function fmtFecha(str) {
+    if (!str) return '—';
+    const d = new Date(str);
+    const diffH = (Date.now() - d) / 3600000;
+    if (diffH < 1)   return 'Hace unos minutos';
+    if (diffH < 24)  return `Hace ${Math.floor(diffH)}h`;
+    if (diffH < 48)  return 'Ayer';
+    if (diffH < 168) return `Hace ${Math.floor(diffH / 24)} días`;
+    return d.toLocaleDateString('es-VE', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+
+function chipHtml(mat) {
+    const s = MAT[mat] || { chip: '#f1f5f9:#475569', bar: '#94a3b8' };
+    const [bg, fg] = s.chip.split(':');
+    return `<span style="background:${bg};color:${fg};"
+        class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold">${mat}</span>`;
+}
+
+// ─── Load data ──────────────────────────────────────────────────────────
+async function loadData() {
+    setLoading(true);
+    spinRefresh(true);
+
+    const { data, error } = await sb
+        .from('sorteo_registros')
+        .select('*')
+        .order('fecha_creacion', { ascending: false });
+
+    spinRefresh(false);
+
+    if (error) {
+        console.error('Error:', error);
+        setLoading(false);
+        return;
+    }
+
+    allData = data || [];
+    populateFilters();
+    applyFilters();
+    setLoading(false);
+
+    const t = new Date();
+    document.getElementById('lastUpdate').textContent =
+        `Actualizado ${t.toLocaleTimeString('es-VE', { hour: '2-digit', minute: '2-digit' })}`;
+    document.getElementById('lastUpdate').classList.remove('hidden');
+}
+
+// ─── Populate estado dropdown only ──────────────────────────────────────
+function populateFilters() {
+    // Solo poblamos estados (dinámico desde DB); promotores ya están hardcoded
+    const estados = [...new Set(allData.map(r => r.estado).filter(Boolean))].sort();
+    const sel2 = document.getElementById('filterEstado');
+    sel2.innerHTML = '<option value="">Todos los estados</option>';
+    estados.forEach(e => {
+        const o = document.createElement('option'); o.value = o.textContent = e;
+        sel2.appendChild(o);
+    });
+}
+
+// ─── Filters + sort ─────────────────────────────────────────────────────
+function applyFilters() {
+    const q   = document.getElementById('searchInput').value.toLowerCase().trim();
+    const pro = document.getElementById('filterPromotor').value;
+    const est = document.getElementById('filterEstado').value;
+    const mat = document.getElementById('filterMaterial').value;
+    const srt = document.getElementById('sortBy').value;
+
+    filtered = allData.filter(r => {
+        const okQ   = !q   || (r.promotor_nombre||'').toLowerCase().includes(q) || (r.cliente_nombre||'').toLowerCase().includes(q);
+        const okPro = !pro || r.promotor_nombre === pro;
+        const okEst = !est || r.estado === est;
+        const okMat = !mat || (r.materiales_entregados||[]).includes(mat);
+        return okQ && okPro && okEst && okMat;
+    });
+
+    filtered.sort((a, b) => {
+        if (srt === 'reciente')  return new Date(b.fecha_creacion) - new Date(a.fecha_creacion);
+        if (srt === 'antiguo')   return new Date(a.fecha_creacion) - new Date(b.fecha_creacion);
+        if (srt === 'promotor')  return (a.promotor_nombre||'').localeCompare(b.promotor_nombre||'');
+        if (srt === 'estado')    return (a.estado||'').localeCompare(b.estado||'');
+        return 0;
+    });
+
+    renderStats(filtered);
+    renderMaterialChart(filtered);
+    renderCards(filtered);
+}
+
+// ─── Stats ──────────────────────────────────────────────────────────────
+function renderStats(data) {
+    const uniqProm = new Set(data.map(r => r.promotor_nombre)).size;
+    const uniqEst  = new Set(data.map(r => r.estado).filter(Boolean)).size;
+    const totalFot = data.reduce((s, r) => s + getPhotos(r).length, 0);
+
+    document.getElementById('statVisitas').textContent   = data.length;
+    document.getElementById('statPromotores').textContent = uniqProm;
+    document.getElementById('statEstados').textContent   = uniqEst;
+    document.getElementById('statFotos').textContent     = totalFot;
+    document.getElementById('resultsCount').textContent  =
+        `${data.length} registro${data.length !== 1 ? 's' : ''} encontrado${data.length !== 1 ? 's' : ''}`;
+}
+
+// ─── Material bar chart ──────────────────────────────────────────────────
+function renderMaterialChart(data) {
+    const counts = {};
+    data.forEach(r => (r.materiales_entregados||[]).forEach(m => { counts[m] = (counts[m]||0) + 1; }));
+
+    const sorted = Object.entries(counts).sort((a,b) => b[1]-a[1]);
+    const max = sorted[0]?.[1] || 1;
+    const total = sorted.reduce((s,[,c]) => s+c, 0);
+
+    const el = document.getElementById('materialStats');
+
+    if (!sorted.length) {
+        el.innerHTML = '<p class="text-sm" style="color:#94a3b8;">Sin datos de materiales.</p>';
+        return;
+    }
+
+    el.innerHTML = sorted.map(([mat, count]) => {
+        const s   = MAT[mat] || { chip: '#f1f5f9:#475569', bar: '#94a3b8' };
+        const [,fg] = s.chip.split(':');
+        const pct = Math.round((count / max) * 100);
+        const pctTotal = total > 0 ? Math.round((count / total) * 100) : 0;
+        return `
+        <div class="flex items-center gap-3 group">
+            <span class="text-xs font-black w-32 shrink-0 truncate" style="color:${fg};">${mat}</span>
+            <div class="flex-1 rounded-full overflow-hidden" style="height:20px; background:#f1f5f9;">
+                <div class="h-full rounded-full flex items-center justify-end pr-3 transition-all duration-700 ease-out"
+                    style="width:${pct}%; background:${s.bar}22; border:1.5px solid ${s.bar}55;">
+                    <span class="text-xs font-bold opacity-0 group-hover:opacity-100 transition" style="color:${fg}; font-size:10px;">${pctTotal}%</span>
+                </div>
+            </div>
+            <span class="text-sm font-black w-8 text-right shrink-0 font-mono" style="color:#0f172a;">${count}</span>
+        </div>`;
+    }).join('');
+}
+
+// ─── Cards ───────────────────────────────────────────────────────────────
+function renderCards(data) {
+    const grid  = document.getElementById('registrosGrid');
+    const empty = document.getElementById('emptyState');
+
+    if (!data.length) {
+        grid.style.display   = 'none';
+        empty.style.display  = 'block';
+        return;
+    }
+    empty.style.display  = 'none';
+    grid.style.display   = 'grid';
+
+    grid.innerHTML = data.map((r, i) => {
+        const fotos    = getPhotos(r);
+        const mats     = r.materiales_entregados || [];
+        const initials = (r.promotor_nombre || '?').slice(0, 2).toUpperCase();
+        const avatarBg = nameToColor(r.promotor_nombre || '');
+        const fecha    = fmtFecha(r.fecha_creacion);
+
+        // Thumbnails: max 5 + overflow badge
+        const MAX = 5;
+        const thumbs = fotos.slice(0, MAX).map((url, idx) => `
+            <button onclick="openLightbox(${i},${idx})"
+                class="photo-thumb aspect-square rounded-xl overflow-hidden bg-slate-100 block">
+                <img src="${url}" alt="Foto" loading="lazy"
+                    class="w-full h-full object-cover"
+                    onerror="this.style.display='none'">
+            </button>`).join('');
+
+        const more = fotos.length > MAX
+            ? `<button onclick="openLightbox(${i},${MAX})"
+                    class="photo-thumb aspect-square rounded-xl flex items-center justify-center font-black text-sm text-white transition"
+                    style="background:var(--accent);">
+                    +${fotos.length - MAX}
+               </button>` : '';
+
+        const noPhoto = !fotos.length
+            ? `<div class="col-span-3 rounded-xl border-2 border-dashed py-5 flex flex-col items-center gap-1.5" style="border-color:#e2e8f0;">
+                <svg class="w-7 h-7" style="color:#cbd5e1;" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                        d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
+                </svg>
+                <span class="text-xs font-semibold" style="color:#94a3b8;">Sin fotos</span>
+               </div>` : '';
+
+        return `
+        <div class="reg-card bg-white rounded-2xl border overflow-hidden" style="border-color:var(--border);">
+
+            <!-- Header -->
+            <div class="flex items-center gap-3 px-4 py-3.5" style="border-bottom:1px solid #f1f5f9;">
+                <div class="w-10 h-10 rounded-full flex items-center justify-center text-white font-black text-sm shrink-0"
+                    style="background:${avatarBg};">
+                    ${initials}
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="font-bold text-sm truncate" style="color:var(--text-1);">${r.promotor_nombre || '—'}</p>
+                    <p class="text-xs" style="color:var(--text-3);">${fecha}</p>
+                </div>
+                <span class="text-xs font-bold font-mono px-2 py-1 rounded-lg shrink-0"
+                    style="background:#f8fafc; color:var(--text-3);">#${r.id}</span>
+            </div>
+
+            <!-- Body -->
+            <div class="p-4 space-y-3">
+
+                <!-- Cliente + Estado -->
+                <div class="flex items-start justify-between gap-2">
+                    <div class="min-w-0">
+                        <p class="text-xs font-bold uppercase tracking-wider mb-0.5" style="color:var(--text-3);">Cliente</p>
+                        <p class="font-bold text-sm truncate" style="color:var(--text-1);">${r.cliente_nombre || '—'}</p>
+                    </div>
+                    ${r.estado ? `
+                    <div class="shrink-0 flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-bold"
+                        style="background:#eff6ff; color:#1d4ed8; border:1px solid #bfdbfe;">
+                        <svg class="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
+                        </svg>
+                        ${r.estado}
+                    </div>` : ''}
+                </div>
+
+                <!-- Materiales -->
+                <div>
+                    <p class="text-xs font-bold uppercase tracking-wider mb-2" style="color:var(--text-3);">Material POP</p>
+                    ${mats.length
+                        ? `<div class="flex flex-wrap gap-1.5">${mats.map(chipHtml).join('')}</div>`
+                        : `<p class="text-xs italic" style="color:var(--text-3);">Sin materiales registrados</p>`
+                    }
+                </div>
+
+                <!-- Fotos -->
+                <div>
+                    <div class="flex items-center justify-between mb-2">
+                        <p class="text-xs font-bold uppercase tracking-wider" style="color:var(--text-3);">Evidencias</p>
+                        ${fotos.length ? `<span class="text-xs font-bold font-mono" style="color:var(--accent);">${fotos.length} foto${fotos.length!==1?'s':''}</span>` : ''}
+                    </div>
+                    <div class="grid grid-cols-3 gap-2">
+                        ${noPhoto}
+                        ${thumbs}
+                        ${more}
+                    </div>
+                </div>
+
+            </div>
+        </div>`;
+    }).join('');
+}
+
+// ─── Lightbox ────────────────────────────────────────────────────────────
+function openLightbox(cardIdx, imgIdx) {
+    const r    = filtered[cardIdx];
+    lbImages   = getPhotos(r);
+    lbIdx      = Math.min(imgIdx, lbImages.length - 1);
+    lbCaption  = `${r.promotor_nombre || ''} · ${r.cliente_nombre || ''}`;
+    renderLb();
+    document.getElementById('lightbox').classList.add('lb-open');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeLightbox() {
+    document.getElementById('lightbox').classList.remove('lb-open');
+    document.body.style.overflow = '';
+}
+
+function lbMove(dir) {
+    lbIdx = (lbIdx + dir + lbImages.length) % lbImages.length;
+    renderLb();
+}
+
+function renderLb() {
+    document.getElementById('lbImg').src      = lbImages[lbIdx];
+    document.getElementById('lbCounter').textContent = `${lbIdx + 1} / ${lbImages.length}`;
+    document.getElementById('lbInfo').textContent    = lbCaption;
+    const single = lbImages.length <= 1;
+    document.getElementById('lbPrev').style.display = single ? 'none' : '';
+    document.getElementById('lbNext').style.display = single ? 'none' : '';
+}
+
+// Keyboard
+document.addEventListener('keydown', e => {
+    if (!document.getElementById('lightbox').classList.contains('lb-open')) return;
+    if (e.key === 'Escape')      closeLightbox();
+    if (e.key === 'ArrowLeft')   lbMove(-1);
+    if (e.key === 'ArrowRight')  lbMove(1);
+});
+
+// Backdrop click
+document.getElementById('lightbox').addEventListener('click', function(e) {
+    if (e.target === this) closeLightbox();
+});
+
+// Touch swipe
+let _tsx = 0;
+document.getElementById('lightbox').addEventListener('touchstart', e => { _tsx = e.touches[0].clientX; }, { passive: true });
+document.getElementById('lightbox').addEventListener('touchend',   e => {
+    const dx = e.changedTouches[0].clientX - _tsx;
+    if (Math.abs(dx) > 50) lbMove(dx < 0 ? 1 : -1);
+}, { passive: true });
+
+// ─── Loading skeleton ────────────────────────────────────────────────────
+function setLoading(on) {
+    const sk = document.getElementById('loadingSkeleton');
+    const gr = document.getElementById('registrosGrid');
+    if (on) {
+        sk.innerHTML = Array(6).fill(0).map(() => `
+            <div class="bg-white rounded-2xl border overflow-hidden" style="border-color:#e2e8f0;">
+                <div class="flex items-center gap-3 px-4 py-3.5" style="border-bottom:1px solid #f8fafc;">
+                    <div class="skeleton w-10 h-10 rounded-full shrink-0"></div>
+                    <div class="flex-1 space-y-2">
+                        <div class="skeleton h-3.5 w-3/4"></div>
+                        <div class="skeleton h-3 w-1/2"></div>
+                    </div>
+                </div>
+                <div class="p-4 space-y-3">
+                    <div class="skeleton h-4 w-2/3"></div>
+                    <div class="flex gap-2">
+                        <div class="skeleton h-6 w-20 rounded-full"></div>
+                        <div class="skeleton h-6 w-24 rounded-full"></div>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2">
+                        <div class="skeleton aspect-square rounded-xl"></div>
+                        <div class="skeleton aspect-square rounded-xl"></div>
+                        <div class="skeleton aspect-square rounded-xl"></div>
+                    </div>
+                </div>
+            </div>`).join('');
+        sk.style.display = 'grid';
+        gr.style.display = 'none';
+    } else {
+        sk.style.display = 'none';
+    }
+}
+
+// ─── Refresh icon spin ───────────────────────────────────────────────────
+function spinRefresh(on) {
+    const icon = document.getElementById('refreshIcon');
+    icon.style.animation = on ? 'spin 1s linear infinite' : '';
+    if (!document.getElementById('spinStyle')) {
+        const s = document.createElement('style');
+        s.id = 'spinStyle';
+        s.textContent = '@keyframes spin { to { transform: rotate(360deg); } }';
+        document.head.appendChild(s);
+    }
+}
+
+// ─── Filter listeners ────────────────────────────────────────────────────
+let _sd;
+document.getElementById('searchInput').addEventListener('input', () => {
+    clearTimeout(_sd); _sd = setTimeout(applyFilters, 250);
+});
+['filterPromotor','filterEstado','filterMaterial'].forEach(id =>
+    document.getElementById(id).addEventListener('change', applyFilters)
+);
+
+function resetFilters() {
+    ['searchInput','filterPromotor','filterEstado','filterMaterial'].forEach(id => {
+        const el = document.getElementById(id);
+        el.value = '';
+    });
+    applyFilters();
+}
+
+// ─── Init ────────────────────────────────────────────────────────────────
+loadData();
+</script>
+
+</body>
+</html>
