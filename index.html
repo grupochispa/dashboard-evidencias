@@ -11,7 +11,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
-    <!-- Librería para la gráfica de línea de tiempo -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
@@ -78,9 +77,6 @@
 </head>
 <body class="antialiased min-h-screen">
 
-<!-- ══════════════════════════════════════════════════
-     HEADER
-══════════════════════════════════════════════════ -->
 <header class="sticky top-0 z-50 shadow-xl" style="background:var(--navy);">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
         <div class="flex items-center gap-3">
@@ -110,12 +106,8 @@
     </div>
 </header>
 
-<!-- ══════════════════════════════════════════════════
-     STATS BANNER (cambia según la pestaña activa)
-══════════════════════════════════════════════════ -->
 <div style="background:var(--navy2); border-bottom:1px solid var(--navy3);">
 
-    <!-- Stats POP -->
     <div id="statsPopBanner" class="max-w-7xl mx-auto px-4 sm:px-6 py-5 grid grid-cols-2 sm:grid-cols-4 gap-4">
         <div class="text-center">
             <p class="text-xs font-bold uppercase tracking-widest mb-2" style="color:#7fb3d3;">Clientes</p>
@@ -135,7 +127,6 @@
         </div>
     </div>
 
-    <!-- Stats Sorteo -->
     <div id="statsSorteoBanner" class="hidden max-w-7xl mx-auto px-4 sm:px-6 py-5 grid grid-cols-2 sm:grid-cols-4 gap-4">
         <div class="text-center">
             <p class="text-xs font-bold uppercase tracking-widest mb-2" style="color:#7fb3d3;">Total Tickets</p>
@@ -156,9 +147,6 @@
     </div>
 </div>
 
-<!-- ══════════════════════════════════════════════════
-     TAB NAV
-══════════════════════════════════════════════════ -->
 <div class="bg-white border-b sticky top-16 z-40 shadow-sm" style="border-color:var(--brd);">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 flex gap-1">
         <button onclick="switchTab('pop')" id="tabBtnPop"
@@ -182,12 +170,8 @@
 
 <main class="max-w-7xl mx-auto px-4 sm:px-6 py-6">
 
-<!-- ══════════════════════════════════════════════════
-     TAB 1: EVIDENCIAS POP
-══════════════════════════════════════════════════ -->
 <div id="contentPop">
 
-    <!-- Material distribution -->
     <div class="bg-white rounded-2xl p-5 border shadow-sm mb-5" style="border-color:var(--brd);">
         <p class="text-xs font-black uppercase tracking-widest mb-4" style="color:var(--t3);">Distribución de Material POP</p>
         <div id="materialStats" class="space-y-3">
@@ -199,7 +183,6 @@
         </div>
     </div>
 
-    <!-- ── RANKING DE VENDEDORES ─────────────────────────────── -->
     <div class="bg-white rounded-2xl border shadow-sm mb-5 overflow-hidden" style="border-color:var(--brd);">
         <div class="flex items-center justify-between px-5 py-4" style="border-bottom:1px solid var(--brd);">
             <div class="flex items-center gap-2">
@@ -211,14 +194,12 @@
             </p>
         </div>
 
-        <!-- Top 3 podium -->
         <div id="rankingPodium" class="grid grid-cols-1 sm:grid-cols-3 gap-4 p-5">
             <div class="skeleton h-36 rounded-2xl"></div>
             <div class="skeleton h-36 rounded-2xl"></div>
             <div class="skeleton h-36 rounded-2xl"></div>
         </div>
 
-        <!-- Full ranking table -->
         <div class="px-5 pb-5">
             <div class="overflow-x-auto rounded-xl border" style="border-color:var(--brd);">
                 <table class="w-full text-sm" id="rankingTable">
@@ -244,7 +225,6 @@
         </div>
     </div>
 
-    <!-- Filters -->
     <div class="bg-white rounded-2xl p-4 border shadow-sm mb-5" style="border-color:var(--brd);">
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             <div class="relative sm:col-span-2 lg:col-span-1">
@@ -297,7 +277,6 @@
         </div>
     </div>
 
-    <!-- Toolbar -->
     <div class="flex items-center justify-between gap-3 flex-wrap mb-5">
         <p id="resultsCount" class="text-sm font-semibold" style="color:var(--t2);">Cargando...</p>
         <select id="sortBy" onchange="applyFilters()" class="border rounded-xl px-3 py-2 text-sm bg-white outline-none appearance-none" style="border-color:var(--brd);">
@@ -308,13 +287,10 @@
         </select>
     </div>
 
-    <!-- Skeleton -->
     <div id="loadingSkeleton" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5"></div>
 
-    <!-- Cards grid -->
     <div id="registrosGrid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5" style="display:none;"></div>
 
-    <!-- Empty -->
     <div id="emptyState" style="display:none;" class="text-center py-24">
         <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-4" style="background:#f1f5f9;">
             <svg class="w-8 h-8" style="color:var(--t3);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -327,14 +303,9 @@
     </div>
 </div>
 
-<!-- ══════════════════════════════════════════════════
-     TAB 2: SORTEO
-══════════════════════════════════════════════════ -->
 <div id="contentSorteo" style="display:none;">
 
-    <!-- Analytics Charts y Ranking Estados Sorteo -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-5">
-        <!-- Gráfica Histórica de Tickets -->
         <div class="bg-white rounded-2xl border shadow-sm p-5 flex flex-col" style="border-color:var(--brd);">
             <div class="flex items-center justify-between mb-4">
                 <p class="text-xs font-black uppercase tracking-widest" style="color:var(--t3);">Línea de Tiempo (Tickets Diarios)</p>
@@ -344,30 +315,25 @@
             </div>
         </div>
         
-        <!-- Ranking de Estados con mayor volumen -->
         <div class="bg-white rounded-2xl border shadow-sm p-5 flex flex-col" style="border-color:var(--brd);">
             <p class="text-xs font-black uppercase tracking-widest mb-4" style="color:var(--t3);">Ranking por Estado</p>
             <div id="estadosSorteoRanking" class="space-y-4 overflow-y-auto pr-2" style="max-height: 250px;">
-                <!-- Rellenado por JS -->
-            </div>
+                </div>
         </div>
     </div>
 
-    <!-- Big ticket count -->
     <div class="bg-white rounded-2xl border shadow-sm overflow-hidden mb-5" style="border-color:var(--brd);">
         <div class="flex items-center gap-3 px-5 py-4" style="border-bottom:1px solid var(--brd);">
             <span class="text-xl">🎟️</span>
             <p class="font-black text-base" style="color:var(--t1);">Estatus de los Tickets Registrados</p>
         </div>
 
-        <!-- Main number -->
         <div class="flex flex-col items-center justify-center py-12 px-6">
             <p class="text-xs font-black uppercase tracking-widest mb-3" style="color:var(--t3);">Total de tickets procesados</p>
             <p id="bigTicketNum" class="font-black" style="font-size:5rem; line-height:1; font-family:'DM Mono',monospace; color:var(--t1);">—</p>
             <p id="ticketSubtitle" class="text-sm font-semibold mt-3" style="color:var(--t3);">tickets para el sorteo</p>
         </div>
 
-        <!-- Status breakdown -->
         <div class="grid grid-cols-3 gap-0" style="border-top:1px solid var(--brd);">
             <div class="text-center py-6 px-4" style="border-right:1px solid var(--brd);">
                 <p class="text-xs font-black uppercase tracking-widest mb-2" style="color:#16a34a;">Aprobados</p>
@@ -387,7 +353,6 @@
         </div>
     </div>
 
-    <!-- Progress bar -->
     <div class="bg-white rounded-2xl border shadow-sm p-5 mb-5" style="border-color:var(--brd);">
         <p class="text-xs font-black uppercase tracking-widest mb-4" style="color:var(--t3);">Composición del total</p>
         <div id="ticketProgressBar" class="flex rounded-full overflow-hidden h-8 gap-0.5">
@@ -396,7 +361,6 @@
         <div class="flex flex-wrap gap-4 mt-4" id="ticketLegend"></div>
     </div>
 
-    <!-- Ganadores highlight -->
     <div id="ganadoresCard" class="bg-white rounded-2xl border shadow-sm p-6 mb-5" style="border-color:var(--brd);">
         <div class="flex items-center gap-3 mb-2">
             <span class="text-2xl">⭐</span>
@@ -410,9 +374,6 @@
 
 </main>
 
-<!-- ══════════════════════════════════════════════════
-     LIGHTBOX
-══════════════════════════════════════════════════ -->
 <div id="lightbox" class="fixed inset-0 z-[200]" style="background:rgba(5,15,28,.96);">
     <button onclick="closeLightbox()" class="absolute top-4 right-4 z-10 p-2.5 rounded-full transition hover:scale-110" style="background:rgba(255,255,255,.1);">
         <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -430,9 +391,6 @@
     <div id="lbInfo" class="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 text-white text-xs font-semibold px-5 py-2.5 rounded-xl whitespace-nowrap max-w-xs truncate" style="background:rgba(255,255,255,.1);"></div>
 </div>
 
-<!-- ══════════════════════════════════════════════════
-     JAVASCRIPT
-══════════════════════════════════════════════════ -->
 <script>
 const SUPABASE_URL      = 'https://zgbsrbjtjnozpzxifpua.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpnYnNyYmp0am5venB6eGlmcHVhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQzNjI5MjUsImV4cCI6MjA2OTkzODkyNX0.zHVKe6Ab73PFhQqD3Au94x1Z71hMyRpxE1PCWP8-QTI';
@@ -505,7 +463,6 @@ function switchTab(tab) {
 // ─── Load all ─────────────────────────────────────────────────────────────
 async function loadAll() {
     spinRefresh(true);
-    // Para asegurar cruce de datos, primero cargamos el POP y luego los tickets
     await loadPop(); 
     await loadSorteo();
     spinRefresh(false);
@@ -521,7 +478,7 @@ async function loadPop() {
     const { data, error } = await sb
         .from('sorteo_registros')
         .select('*')
-        .order('fecha_creacion', { ascending: false });
+        .order('fecha_creacion', { ascending: false }); // Asumo que en sorteo_registros sí se llama fecha_creacion
 
     if (error) { console.error(error); setLoading(false); return; }
     allData = data || [];
@@ -532,11 +489,11 @@ async function loadPop() {
 
 // ─── Load Sorteo tickets ──────────────────────────────────────────────────
 async function loadSorteo() {
-    // Traemos todo para incluir fecha de creación y variables de estado o ubicación
+    // CORRECCIÓN: Se cambió "fecha_creacion" a "creado_en" según el esquema SQL
     const { data, error } = await sb
         .from('sorteo_tickets')
         .select('*')
-        .order('fecha_creacion', { ascending: true }); // orden ascendente para línea de tiempo
+        .order('creado_en', { ascending: true }); 
 
     if (error) { console.error('sorteo error:', error); return; }
     sorteoTicketsData = data || [];
@@ -551,13 +508,12 @@ function renderSorteoCharts(tickets) {
     // 1. Ranking por Estado de origen del ticket
     const estadosCount = {};
     tickets.forEach(t => {
-        // Intenta obtener el estado de ubicación geográfico.
-        // Asumo que puede existir como estado_cliente, estado_geo... 
-        // Si no está directamente, cruzo con los datos de allData (POP) usando el cliente_nombre.
-        let est = t.estado_cliente || t.estado_geo || t.estado_ubicacion;
+        // CORRECCIÓN: Ajustado a estado_comercio según esquema SQL
+        let est = t.estado_comercio;
         
         if (!est) {
-            const popMatch = allData.find(p => p.cliente_nombre && t.cliente_nombre && p.cliente_nombre.toLowerCase().trim() === t.cliente_nombre.toLowerCase().trim());
+            // CORRECCIÓN: Cruce utilizando "establecimiento" de sorteo_tickets con "cliente_nombre" de sorteo_registros
+            const popMatch = allData.find(p => p.cliente_nombre && t.establecimiento && p.cliente_nombre.toLowerCase().trim() === t.establecimiento.toLowerCase().trim());
             if (popMatch && popMatch.estado) {
                 est = popMatch.estado;
             }
@@ -592,8 +548,9 @@ function renderSorteoCharts(tickets) {
     // 2. Línea de Tiempo de Tickets (Gráfica)
     const dates = {};
     tickets.forEach(t => {
-        if(!t.fecha_creacion) return;
-        const d = t.fecha_creacion.split('T')[0]; // Se asume YYYY-MM-DD
+        // CORRECCIÓN: Ajustado a creado_en
+        if(!t.creado_en) return;
+        const d = t.creado_en.split('T')[0]; // Se asume YYYY-MM-DD
         dates[d] = (dates[d] || 0) + 1;
     });
 
@@ -665,13 +622,13 @@ function renderSorteoStats(data) {
     const pct = (n) => total > 0 ? Math.round((n/total)*100) : 0;
 
     // Stats banner
-    document.getElementById('sTotal').textContent     = total;
+    document.getElementById('sTotal').textContent      = total;
     document.getElementById('sAprobados').textContent  = aprobados;
     document.getElementById('sPendientes').textContent = pendientes;
     document.getElementById('sRechazados').textContent = rechazados;
 
     // Big numbers
-    document.getElementById('bigTicketNum').textContent  = total.toLocaleString('es-VE');
+    document.getElementById('bigTicketNum').textContent   = total.toLocaleString('es-VE');
     document.getElementById('ticketSubtitle').textContent = total === 1 ? 'ticket procesado' : 'tickets procesados';
     document.getElementById('bigAprobados').textContent   = aprobados;
     document.getElementById('bigPendientes').textContent  = pendientes;
@@ -793,8 +750,6 @@ function renderMaterialChart(data) {
 function computeRanking(data) {
     const map = {};
     
-    // Rellenamos previamente el diccionario con todos los vendedores 
-    // existentes del sistema para que también figuren los inactivos
     TODOS_LOS_VENDEDORES.forEach(v => {
         map[v] = { nombre: v, visitas: 0, materiales: 0, fotos: 0, porMat: {} };
     });
@@ -823,7 +778,6 @@ function renderRanking(data) {
         return;
     }
 
-    // El top 3 se toma sólo de los mejores (ignorando inactivos al final de la lista si no hicieron nada)
     const podiumOrder = [ranking[1], ranking[0], ranking[2]];
     const podiumMeta  = [
         { medal:'🥈', label:'2.°', cls:'rank-silver', scale:'scale-95' },
@@ -832,7 +786,6 @@ function renderRanking(data) {
     ];
 
     podium.innerHTML = podiumOrder.map((v, i) => {
-        // Validación en caso de que alguien esté en el podio pero con 0 ventas absoluto
         if (!v || v.visitas === 0) return `<div class="rounded-2xl border-2 border-dashed flex items-center justify-center py-10" style="border-color:var(--brd);"><p class="text-sm" style="color:var(--t3);">—</p></div>`;
         const m    = podiumMeta[i];
         const bg   = nameColor(v.nombre);
@@ -867,7 +820,7 @@ function renderRanking(data) {
         </div>`;
     }).join('');
 
-    // ── Full table con validación de inactividad ───────────────────────────────────────────────
+    // ── Full table ───────────────────────────────────────────────
     const tbody = document.getElementById('rankingTableBody');
     tbody.innerHTML = ranking.map((v, i) => {
         const pos      = i + 1;
@@ -875,7 +828,6 @@ function renderRanking(data) {
         const bg       = nameColor(v.nombre);
         const init     = v.nombre.slice(0,2).toUpperCase();
         
-        // Criterio de bajo rendimiento/inactividad (Rojo)
         const inactivoOPocoMaterial = v.visitas < 5 && v.materiales < 5;
         const rowBg      = inactivoOPocoMaterial ? 'background:#fef2f2;' : (i % 2 === 0 ? '' : 'background:#fafbfc;');
         const nombreColor= inactivoOPocoMaterial ? '#ef4444' : 'var(--t1)';
