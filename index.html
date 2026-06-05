@@ -11,6 +11,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
+    <!-- Librería para la gráfica de línea de tiempo -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
@@ -77,6 +78,9 @@
 </head>
 <body class="antialiased min-h-screen">
 
+<!-- ══════════════════════════════════════════════════
+     HEADER
+══════════════════════════════════════════════════ -->
 <header class="sticky top-0 z-50 shadow-xl" style="background:var(--navy);">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
         <div class="flex items-center gap-3">
@@ -106,11 +110,15 @@
     </div>
 </header>
 
+<!-- ══════════════════════════════════════════════════
+     STATS BANNER (cambia según la pestaña activa)
+══════════════════════════════════════════════════ -->
 <div style="background:var(--navy2); border-bottom:1px solid var(--navy3);">
 
+    <!-- Stats POP -->
     <div id="statsPopBanner" class="max-w-7xl mx-auto px-4 sm:px-6 py-5 grid grid-cols-2 sm:grid-cols-4 gap-4">
         <div class="text-center">
-            <p class="text-xs font-bold uppercase tracking-widest mb-2" style="color:#7fb3d3;">Clientes</p>
+            <p class="text-xs font-bold uppercase tracking-widest mb-2" style="color:#7fb3d3;">Clientes Visitados</p>
             <p id="statVisitas" class="font-black text-4xl text-white stat-num" style="font-family:'DM Mono',monospace;">—</p>
         </div>
         <div class="text-center">
@@ -127,6 +135,7 @@
         </div>
     </div>
 
+    <!-- Stats Sorteo -->
     <div id="statsSorteoBanner" class="hidden max-w-7xl mx-auto px-4 sm:px-6 py-5 grid grid-cols-2 sm:grid-cols-4 gap-4">
         <div class="text-center">
             <p class="text-xs font-bold uppercase tracking-widest mb-2" style="color:#7fb3d3;">Total Tickets</p>
@@ -147,6 +156,9 @@
     </div>
 </div>
 
+<!-- ══════════════════════════════════════════════════
+     TAB NAV
+══════════════════════════════════════════════════ -->
 <div class="bg-white border-b sticky top-16 z-40 shadow-sm" style="border-color:var(--brd);">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 flex gap-1">
         <button onclick="switchTab('pop')" id="tabBtnPop"
@@ -170,11 +182,15 @@
 
 <main class="max-w-7xl mx-auto px-4 sm:px-6 py-6">
 
+<!-- ══════════════════════════════════════════════════
+     TAB 1: EVIDENCIAS POP
+══════════════════════════════════════════════════ -->
 <div id="contentPop">
 
+    <!-- Distribucion de Clientes -->
     <div class="bg-white rounded-2xl p-5 border shadow-sm mb-5" style="border-color:var(--brd);">
-        <p class="text-xs font-black uppercase tracking-widest mb-4" style="color:var(--t3);">Distribución de Material POP</p>
-        <div id="materialStats" class="space-y-3">
+        <p class="text-xs font-black uppercase tracking-widest mb-4" style="color:var(--t3);">Distribución de Clientes por Estado</p>
+        <div id="clientesDistribucionStats" class="space-y-3">
             <div class="skeleton h-6 w-full"></div>
             <div class="skeleton h-6 w-4/5"></div>
             <div class="skeleton h-6 w-3/5"></div>
@@ -183,23 +199,26 @@
         </div>
     </div>
 
+    <!-- ── RANKING DE VENDEDORES ─────────────────────────────── -->
     <div class="bg-white rounded-2xl border shadow-sm mb-5 overflow-hidden" style="border-color:var(--brd);">
         <div class="flex items-center justify-between px-5 py-4" style="border-bottom:1px solid var(--brd);">
             <div class="flex items-center gap-2">
                 <span class="text-xl">🏆</span>
                 <p class="font-black text-base" style="color:var(--t1);">Ranking de Vendedores</p>
             </div>
-            <p class="text-xs font-semibold px-2.5 py-1 rounded-lg" style="background:#f0fdf4; color:#16a34a;">
-                por materiales colocados
+            <p class="text-xs font-semibold px-2.5 py-1 rounded-lg" style="background:#eff6ff; color:#1d4ed8;">
+                por clientes visitados
             </p>
         </div>
 
+        <!-- Top 3 podium -->
         <div id="rankingPodium" class="grid grid-cols-1 sm:grid-cols-3 gap-4 p-5">
             <div class="skeleton h-36 rounded-2xl"></div>
             <div class="skeleton h-36 rounded-2xl"></div>
             <div class="skeleton h-36 rounded-2xl"></div>
         </div>
 
+        <!-- Full ranking table -->
         <div class="px-5 pb-5">
             <div class="overflow-x-auto rounded-xl border" style="border-color:var(--brd);">
                 <table class="w-full text-sm" id="rankingTable">
@@ -207,8 +226,9 @@
                         <tr style="background:#f8fafc; border-bottom:1px solid var(--brd);">
                             <th class="text-left px-4 py-3 text-xs font-black uppercase tracking-wider" style="color:var(--t3);">#</th>
                             <th class="text-left px-4 py-3 text-xs font-black uppercase tracking-wider" style="color:var(--t3);">Vendedor</th>
-                            <th class="text-center px-4 py-3 text-xs font-black uppercase tracking-wider" style="color:var(--t3);">Clientes</th>
-                            <th class="text-center px-4 py-3 text-xs font-black uppercase tracking-wider" style="color:var(--t3);">Mat. Total</th>
+                            <th class="text-center px-4 py-3 text-xs font-black uppercase tracking-wider" style="color:var(--accent);">Clientes</th>
+                            <th class="text-center px-4 py-3 text-xs font-black uppercase tracking-wider" style="color:#16a34a;">Mat. Total</th>
+                            <th class="text-center px-4 py-3 text-xs font-black uppercase tracking-wider" style="color:#d97706;" title="Promedio de materiales por cliente">Promedio</th>
                             <th class="text-center px-3 py-3 text-xs font-black uppercase tracking-wider" style="color:#1d4ed8;">CENEFA</th>
                             <th class="text-center px-3 py-3 text-xs font-black uppercase tracking-wider" style="color:#15803d;">HABLADOR</th>
                             <th class="text-center px-3 py-3 text-xs font-black uppercase tracking-wider" style="color:#c2410c;">AFICHE</th>
@@ -218,13 +238,14 @@
                         </tr>
                     </thead>
                     <tbody id="rankingTableBody">
-                        <tr><td colspan="10" class="text-center py-8" style="color:var(--t3);">Cargando...</td></tr>
+                        <tr><td colspan="11" class="text-center py-8" style="color:var(--t3);">Cargando...</td></tr>
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
 
+    <!-- Filters -->
     <div class="bg-white rounded-2xl p-4 border shadow-sm mb-5" style="border-color:var(--brd);">
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
             <div class="relative sm:col-span-2 lg:col-span-1">
@@ -251,7 +272,7 @@
                 <option value="JOSE DEL ROSARIO">Jose Del Rosario</option>
                 <option value="LUIS FLORES">Luis Flores</option>
                 <option value="MARCOS VIDAL">Marcos Vidal</option>
-                <option value="MARIO BIGOTT">Mario Bigott</option>
+                <option value="MARIO BIGOTT">Mario BIGOTT</option>
                 <option value="OWER ABREU">Ower Abreu</option>
                 <option value="PIERO FIGUEROA">Piero Figueroa</option>
                 <option value="RAFAEL GARCÍA">Rafael García</option>
@@ -277,6 +298,7 @@
         </div>
     </div>
 
+    <!-- Toolbar -->
     <div class="flex items-center justify-between gap-3 flex-wrap mb-5">
         <p id="resultsCount" class="text-sm font-semibold" style="color:var(--t2);">Cargando...</p>
         <select id="sortBy" onchange="applyFilters()" class="border rounded-xl px-3 py-2 text-sm bg-white outline-none appearance-none" style="border-color:var(--brd);">
@@ -287,10 +309,13 @@
         </select>
     </div>
 
+    <!-- Skeleton -->
     <div id="loadingSkeleton" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5"></div>
 
+    <!-- Cards grid -->
     <div id="registrosGrid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5" style="display:none;"></div>
 
+    <!-- Empty -->
     <div id="emptyState" style="display:none;" class="text-center py-24">
         <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-4" style="background:#f1f5f9;">
             <svg class="w-8 h-8" style="color:var(--t3);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -303,9 +328,14 @@
     </div>
 </div>
 
+<!-- ══════════════════════════════════════════════════
+     TAB 2: SORTEO
+══════════════════════════════════════════════════ -->
 <div id="contentSorteo" style="display:none;">
 
+    <!-- Analytics Charts y Ranking Estados Sorteo -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-5">
+        <!-- Gráfica Histórica de Tickets -->
         <div class="bg-white rounded-2xl border shadow-sm p-5 flex flex-col" style="border-color:var(--brd);">
             <div class="flex items-center justify-between mb-4">
                 <p class="text-xs font-black uppercase tracking-widest" style="color:var(--t3);">Línea de Tiempo (Tickets Diarios)</p>
@@ -315,25 +345,30 @@
             </div>
         </div>
         
+        <!-- Ranking de Estados con mayor volumen -->
         <div class="bg-white rounded-2xl border shadow-sm p-5 flex flex-col" style="border-color:var(--brd);">
             <p class="text-xs font-black uppercase tracking-widest mb-4" style="color:var(--t3);">Ranking por Estado</p>
             <div id="estadosSorteoRanking" class="space-y-4 overflow-y-auto pr-2" style="max-height: 250px;">
-                </div>
+                <!-- Rellenado por JS -->
+            </div>
         </div>
     </div>
 
+    <!-- Big ticket count -->
     <div class="bg-white rounded-2xl border shadow-sm overflow-hidden mb-5" style="border-color:var(--brd);">
         <div class="flex items-center gap-3 px-5 py-4" style="border-bottom:1px solid var(--brd);">
             <span class="text-xl">🎟️</span>
             <p class="font-black text-base" style="color:var(--t1);">Estatus de los Tickets Registrados</p>
         </div>
 
+        <!-- Main number -->
         <div class="flex flex-col items-center justify-center py-12 px-6">
             <p class="text-xs font-black uppercase tracking-widest mb-3" style="color:var(--t3);">Total de tickets procesados</p>
             <p id="bigTicketNum" class="font-black" style="font-size:5rem; line-height:1; font-family:'DM Mono',monospace; color:var(--t1);">—</p>
             <p id="ticketSubtitle" class="text-sm font-semibold mt-3" style="color:var(--t3);">tickets para el sorteo</p>
         </div>
 
+        <!-- Status breakdown -->
         <div class="grid grid-cols-3 gap-0" style="border-top:1px solid var(--brd);">
             <div class="text-center py-6 px-4" style="border-right:1px solid var(--brd);">
                 <p class="text-xs font-black uppercase tracking-widest mb-2" style="color:#16a34a;">Aprobados</p>
@@ -353,6 +388,7 @@
         </div>
     </div>
 
+    <!-- Progress bar -->
     <div class="bg-white rounded-2xl border shadow-sm p-5 mb-5" style="border-color:var(--brd);">
         <p class="text-xs font-black uppercase tracking-widest mb-4" style="color:var(--t3);">Composición del total</p>
         <div id="ticketProgressBar" class="flex rounded-full overflow-hidden h-8 gap-0.5">
@@ -361,6 +397,7 @@
         <div class="flex flex-wrap gap-4 mt-4" id="ticketLegend"></div>
     </div>
 
+    <!-- Ganadores highlight -->
     <div id="ganadoresCard" class="bg-white rounded-2xl border shadow-sm p-6 mb-5" style="border-color:var(--brd);">
         <div class="flex items-center gap-3 mb-2">
             <span class="text-2xl">⭐</span>
@@ -374,6 +411,9 @@
 
 </main>
 
+<!-- ══════════════════════════════════════════════════
+     LIGHTBOX
+══════════════════════════════════════════════════ -->
 <div id="lightbox" class="fixed inset-0 z-[200]" style="background:rgba(5,15,28,.96);">
     <button onclick="closeLightbox()" class="absolute top-4 right-4 z-10 p-2.5 rounded-full transition hover:scale-110" style="background:rgba(255,255,255,.1);">
         <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -391,6 +431,9 @@
     <div id="lbInfo" class="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 text-white text-xs font-semibold px-5 py-2.5 rounded-xl whitespace-nowrap max-w-xs truncate" style="background:rgba(255,255,255,.1);"></div>
 </div>
 
+<!-- ══════════════════════════════════════════════════
+     JAVASCRIPT
+══════════════════════════════════════════════════ -->
 <script>
 const SUPABASE_URL      = 'https://zgbsrbjtjnozpzxifpua.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpnYnNyYmp0am5venB6eGlmcHVhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQzNjI5MjUsImV4cCI6MjA2OTkzODkyNX0.zHVKe6Ab73PFhQqD3Au94x1Z71hMyRpxE1PCWP8-QTI';
@@ -478,7 +521,7 @@ async function loadPop() {
     const { data, error } = await sb
         .from('sorteo_registros')
         .select('*')
-        .order('fecha_creacion', { ascending: false }); // Asumo que en sorteo_registros sí se llama fecha_creacion
+        .order('fecha_creacion', { ascending: false });
 
     if (error) { console.error(error); setLoading(false); return; }
     allData = data || [];
@@ -489,7 +532,6 @@ async function loadPop() {
 
 // ─── Load Sorteo tickets ──────────────────────────────────────────────────
 async function loadSorteo() {
-    // CORRECCIÓN: Se cambió "fecha_creacion" a "creado_en" según el esquema SQL
     const { data, error } = await sb
         .from('sorteo_tickets')
         .select('*')
@@ -508,11 +550,9 @@ function renderSorteoCharts(tickets) {
     // 1. Ranking por Estado de origen del ticket
     const estadosCount = {};
     tickets.forEach(t => {
-        // CORRECCIÓN: Ajustado a estado_comercio según esquema SQL
         let est = t.estado_comercio;
         
         if (!est) {
-            // CORRECCIÓN: Cruce utilizando "establecimiento" de sorteo_tickets con "cliente_nombre" de sorteo_registros
             const popMatch = allData.find(p => p.cliente_nombre && t.establecimiento && p.cliente_nombre.toLowerCase().trim() === t.establecimiento.toLowerCase().trim());
             if (popMatch && popMatch.estado) {
                 est = popMatch.estado;
@@ -548,16 +588,14 @@ function renderSorteoCharts(tickets) {
     // 2. Línea de Tiempo de Tickets (Gráfica)
     const dates = {};
     tickets.forEach(t => {
-        // CORRECCIÓN: Ajustado a creado_en
         if(!t.creado_en) return;
-        const d = t.creado_en.split('T')[0]; // Se asume YYYY-MM-DD
+        const d = t.creado_en.split('T')[0]; 
         dates[d] = (dates[d] || 0) + 1;
     });
 
     const sortedDates = Object.keys(dates).sort();
     const dataValues = sortedDates.map(d => dates[d]);
 
-    // Formatear la etiqueta para la gráfica (DD/MM)
     const labels = sortedDates.map(d => {
         const parts = d.split('-');
         if(parts.length === 3) return `${parts[2]}/${parts[1]}`;
@@ -621,13 +659,11 @@ function renderSorteoStats(data) {
     const ganadores   = data.filter(t => t.es_ganador === true).length;
     const pct = (n) => total > 0 ? Math.round((n/total)*100) : 0;
 
-    // Stats banner
     document.getElementById('sTotal').textContent      = total;
     document.getElementById('sAprobados').textContent  = aprobados;
     document.getElementById('sPendientes').textContent = pendientes;
     document.getElementById('sRechazados').textContent = rechazados;
 
-    // Big numbers
     document.getElementById('bigTicketNum').textContent   = total.toLocaleString('es-VE');
     document.getElementById('ticketSubtitle').textContent = total === 1 ? 'ticket procesado' : 'tickets procesados';
     document.getElementById('bigAprobados').textContent   = aprobados;
@@ -637,10 +673,8 @@ function renderSorteoStats(data) {
     document.getElementById('pctPendientes').textContent  = `${pct(pendientes)}%`;
     document.getElementById('pctRechazados').textContent  = `${pct(rechazados)}%`;
 
-    // Ganadores
     document.getElementById('ganadoresNum').textContent = ganadores;
 
-    // Progress bar
     const bar = document.getElementById('ticketProgressBar');
     if (total === 0) { bar.innerHTML = '<div class="h-full w-full rounded-full bg-slate-200 flex items-center justify-center text-xs text-slate-400">Sin datos</div>'; return; }
 
@@ -701,7 +735,7 @@ function applyFilters() {
     });
 
     renderBannerStats(filtered);
-    renderMaterialChart(filtered);
+    renderClientesDistribucionChart(filtered);
     renderRanking(filtered);
     renderCards(filtered);
 }
@@ -719,26 +753,28 @@ function renderBannerStats(data) {
         `${data.length} registro${data.length!==1?'s':''} encontrado${data.length!==1?'s':''}`;
 }
 
-// ─── Material bar chart ───────────────────────────────────────────────────
-function renderMaterialChart(data) {
+// ─── Clientes Distribution bar chart ──────────────────────────────────────
+function renderClientesDistribucionChart(data) {
     const counts = {};
-    data.forEach(r=>(r.materiales_entregados||[]).forEach(m=>{counts[m]=(counts[m]||0)+1;}));
+    data.forEach(r => {
+        const e = r.estado || 'NO DEFINIDO';
+        counts[e] = (counts[e] || 0) + 1;
+    });
     const sorted = Object.entries(counts).sort((a,b)=>b[1]-a[1]);
     const max = sorted[0]?.[1]||1;
     const total = sorted.reduce((s,[,c])=>s+c,0);
-    const el = document.getElementById('materialStats');
+    const el = document.getElementById('clientesDistribucionStats');
     if(!sorted.length){el.innerHTML='<p class="text-sm" style="color:#94a3b8;">Sin datos.</p>';return;}
-    el.innerHTML = sorted.map(([mat,count])=>{
-        const s=MAT[mat]||{chip:'#f1f5f9:#475569',bar:'#94a3b8'};
-        const[,fg]=s.chip.split(':');
+    
+    el.innerHTML = sorted.map(([estado,count])=>{
         const pct=Math.round((count/max)*100);
         const pctT=total>0?Math.round((count/total)*100):0;
         return `<div class="flex items-center gap-3 group">
-            <span class="text-xs font-black w-32 shrink-0 truncate" style="color:${fg};">${mat}</span>
+            <span class="text-xs font-black w-32 shrink-0 truncate" style="color:var(--t2);">${estado}</span>
             <div class="flex-1 rounded-full overflow-hidden" style="height:20px;background:#f1f5f9;">
                 <div class="h-full rounded-full flex items-center justify-end pr-3 transition-all duration-700"
-                    style="width:${pct}%;background:${s.bar}22;border:1.5px solid ${s.bar}55;">
-                    <span class="text-xs font-bold opacity-0 group-hover:opacity-100 transition" style="color:${fg};font-size:10px;">${pctT}%</span>
+                    style="width:${pct}%;background:rgba(14, 165, 233, 0.2);border:1.5px solid rgba(14, 165, 233, 0.5);">
+                    <span class="text-xs font-bold opacity-0 group-hover:opacity-100 transition" style="color:var(--accent);font-size:10px;">${pctT}%</span>
                 </div>
             </div>
             <span class="text-sm font-black w-8 text-right shrink-0" style="color:#0f172a;font-family:'DM Mono',monospace;">${count}</span>
@@ -764,7 +800,8 @@ function computeRanking(data) {
         });
         map[k].fotos += getPhotos(r).length;
     });
-    return Object.values(map).sort((a,b) => b.materiales - a.materiales || b.visitas - a.visitas);
+    // MODIFICADO: Ordenar primero por visitas (Clientes) y luego por material colocado
+    return Object.values(map).sort((a,b) => b.visitas - a.visitas || b.materiales - a.materiales);
 }
 
 function renderRanking(data) {
@@ -774,7 +811,7 @@ function renderRanking(data) {
     const podium = document.getElementById('rankingPodium');
     if (!ranking.length) {
         podium.innerHTML = '<div class="col-span-3 text-center py-8 text-sm" style="color:var(--t3);">Sin datos de vendedores.</div>';
-        document.getElementById('rankingTableBody').innerHTML = '<tr><td colspan="10" class="text-center py-8 text-sm" style="color:var(--t3);">Sin datos.</td></tr>';
+        document.getElementById('rankingTableBody').innerHTML = '<tr><td colspan="11" class="text-center py-8 text-sm" style="color:var(--t3);">Sin datos.</td></tr>';
         return;
     }
 
@@ -790,9 +827,10 @@ function renderRanking(data) {
         const m    = podiumMeta[i];
         const bg   = nameColor(v.nombre);
         const init = v.nombre.slice(0,2).toUpperCase();
-        const topMats = Object.entries(v.porMat).sort((a,b)=>b[1]-a[1]).slice(0,3);
+        const prom = v.visitas > 0 ? (v.materiales / v.visitas).toFixed(1) : '0.0';
+
         return `
-        <div class="rounded-2xl border-2 p-5 flex flex-col items-center text-center ${m.scale} transition-transform"
+        <div class="rounded-2xl border-2 p-5 flex flex-col items-center text-center ${m.scale} transition-transform relative"
             style="border-color:${i===1?'#fcd34d':i===0?'#cbd5e1':'#fdba74'}; background:${i===1?'#fefce8':i===0?'#f8fafc':'#fff7ed'};">
             <div class="flex items-center gap-2 mb-3">
                 <span class="text-2xl">${m.medal}</span>
@@ -807,16 +845,11 @@ function renderRanking(data) {
                     <p class="font-black text-xl" style="color:var(--accent);font-family:'DM Mono',monospace;">${v.visitas}</p>
                 </div>
                 <div class="rounded-xl py-2 px-3" style="background:rgba(16,185,129,.08);">
-                    <p class="text-xs font-bold" style="color:var(--t3);">Materiales</p>
+                    <p class="text-xs font-bold" style="color:var(--t3);">Material</p>
                     <p class="font-black text-xl" style="color:#10b981;font-family:'DM Mono',monospace;">${v.materiales}</p>
                 </div>
             </div>
-            <div class="flex flex-wrap gap-1 justify-center">
-                ${topMats.map(([mat,cnt])=>{
-                    const s=MAT[mat]||{chip:'#f1f5f9:#475569'};const[bg2,fg]=s.chip.split(':');
-                    return `<span style="background:${bg2};color:${fg};" class="text-xs font-bold px-2 py-0.5 rounded-full">${mat} ×${cnt}</span>`;
-                }).join('')}
-            </div>
+            <p class="text-xs font-bold" style="color:var(--t3);">Promedio: <span style="color:var(--gold);">${prom} mat/cliente</span></p>
         </div>`;
     }).join('');
 
@@ -828,10 +861,28 @@ function renderRanking(data) {
         const bg       = nameColor(v.nombre);
         const init     = v.nombre.slice(0,2).toUpperCase();
         
-        const inactivoOPocoMaterial = v.visitas < 5 && v.materiales < 5;
-        const rowBg      = inactivoOPocoMaterial ? 'background:#fef2f2;' : (i % 2 === 0 ? '' : 'background:#fafbfc;');
-        const nombreColor= inactivoOPocoMaterial ? '#ef4444' : 'var(--t1)';
-        const alertBadge = inactivoOPocoMaterial ? `<span title="Inactivo o poco material" class="ml-1 text-xs">⚠️</span>` : '';
+        // CÁLCULO PROMEDIO
+        const promObj  = v.visitas > 0 ? (v.materiales / v.visitas) : 0;
+        const promStr  = promObj.toFixed(1);
+
+        // CONDICIONALES DE ALARMAS
+        const inactivoTotal = v.visitas < 5 && v.materiales < 5;
+        // Alerta: Si ha visitado a 5 o más clientes y ha colocado menos de 0.35 de material por visita en promedio
+        const alertaBajoMaterial = v.visitas >= 5 && promObj < 0.35;
+
+        let rowBg      = i % 2 === 0 ? '' : 'background:#fafbfc;';
+        let nombreColor= 'var(--t1)';
+        let alertBadge = '';
+
+        if (inactivoTotal) {
+            rowBg = 'background:#fef2f2;';
+            nombreColor = '#ef4444';
+            alertBadge = `<span title="Inactivo o poco rendimiento" class="ml-1 text-xs">⚠️</span>`;
+        } else if (alertaBajoMaterial) {
+            rowBg = 'background:#fff1f2;'; // Rojo más claro/rosado para la alerta de promedio
+            nombreColor = '#be123c'; // Rojo fuerte
+            alertBadge = `<span title="🚨 Baja Colocación POP (Promedio < 0.35)" class="ml-1 text-xs px-2 py-0.5 rounded-full bg-rose-100 text-rose-700 border border-rose-200">🚨 Baja Colocación POP</span>`;
+        }
 
         return `<tr class="border-t transition" style="border-color:#f1f5f9; ${rowBg}">
             <td class="px-4 py-3">
@@ -840,16 +891,17 @@ function renderRanking(data) {
             <td class="px-4 py-3">
                 <div class="flex items-center gap-2.5">
                     <div class="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-black shrink-0"
-                        style="background:${bg}; opacity:${inactivoOPocoMaterial ? '0.7' : '1'};">${init}</div>
-                    <span class="font-bold text-sm whitespace-nowrap" style="color:${nombreColor};">${v.nombre}${alertBadge}</span>
+                        style="background:${bg}; opacity:${inactivoTotal ? '0.7' : '1'};">${init}</div>
+                    <span class="font-bold text-sm whitespace-nowrap" style="color:${nombreColor};">${v.nombre} ${alertBadge}</span>
                 </div>
             </td>
-            <td class="px-4 py-3 text-center font-bold" style="${inactivoOPocoMaterial ? 'color:#b91c1c' : 'color:var(--accent)'};font-family:'DM Mono',monospace;">${v.visitas}</td>
+            <td class="px-4 py-3 text-center font-bold" style="color:var(--accent);font-size:1.1rem;font-family:'DM Mono',monospace;">${v.visitas}</td>
             <td class="px-4 py-3 text-center">
-                <span class="font-black text-sm px-2.5 py-1 rounded-lg" style="${inactivoOPocoMaterial ? 'background:#fee2e2;color:#b91c1c' : 'background:#f0fdf4;color:#16a34a'};font-family:'DM Mono',monospace;">${v.materiales}</span>
+                <span class="font-black text-sm px-2.5 py-1 rounded-lg" style="${inactivoTotal ? 'background:#fee2e2;color:#b91c1c' : 'background:#f0fdf4;color:#16a34a'};font-family:'DM Mono',monospace;">${v.materiales}</span>
             </td>
-            ${MATS_ORDER.map(m => `<td class="px-3 py-3 text-center text-sm font-bold" style="font-family:'DM Mono',monospace; color:${v.porMat[m]?(inactivoOPocoMaterial?'#b91c1c':'var(--t1)'):(inactivoOPocoMaterial?'#fca5a5':'var(--t3)')};">${v.porMat[m]||'—'}</td>`).join('')}
-            <td class="px-4 py-3 text-center text-sm font-semibold" style="${inactivoOPocoMaterial ? 'color:#f87171' : 'color:var(--t3)'};font-family:'DM Mono',monospace;">${v.fotos}</td>
+            <td class="px-4 py-3 text-center font-bold" style="color:${alertaBajoMaterial ? '#be123c' : '#d97706'};font-family:'DM Mono',monospace;">${promStr}</td>
+            ${MATS_ORDER.map(m => `<td class="px-3 py-3 text-center text-sm font-bold" style="font-family:'DM Mono',monospace; color:${v.porMat[m]?(inactivoTotal||alertaBajoMaterial?'#be123c':'var(--t1)'):(inactivoTotal?'#fca5a5':'var(--t3)')};">${v.porMat[m]||'—'}</td>`).join('')}
+            <td class="px-4 py-3 text-center text-sm font-semibold" style="${inactivoTotal||alertaBajoMaterial ? 'color:#f87171' : 'color:var(--t3)'};font-family:'DM Mono',monospace;">${v.fotos}</td>
         </tr>`;
     }).join('');
 }
