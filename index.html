@@ -160,7 +160,7 @@
      TAB NAV
 ══════════════════════════════════════════════════ -->
 <div class="bg-white border-b sticky top-16 z-40 shadow-sm" style="border-color:var(--brd);">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 flex gap-1">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 flex gap-1 overflow-x-auto">
         <button onclick="switchTab('pop')" id="tabBtnPop"
             class="tab-btn active px-5 py-4 text-sm font-bold flex items-center gap-2 transition"
             style="color:var(--accent);">
@@ -176,6 +176,22 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 5v2m0 4v2m0 4v2M5 5a2 2 0 00-2 2v3a2 2 0 110 4v3a2 2 0 002 2h14a2 2 0 002-2v-3a2 2 0 110-4V7a2 2 0 00-2-2H5z"/>
             </svg>
             Sorteo
+        </button>
+        <button onclick="switchTab('vendedores')" id="tabBtnVendedores"
+            class="tab-btn px-5 py-4 text-sm font-bold flex items-center gap-2 transition whitespace-nowrap"
+            style="color:var(--t2);">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m6-1.13a4 4 0 10-4-4 4 4 0 004 4z"/>
+            </svg>
+            Visitas por Vendedor
+        </button>
+        <button onclick="switchTab('kpis')" id="tabBtnKpis"
+            class="tab-btn px-5 py-4 text-sm font-bold flex items-center gap-2 transition whitespace-nowrap"
+            style="color:var(--t2);">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+            </svg>
+            KPIs
         </button>
     </div>
 </div>
@@ -409,6 +425,107 @@
 
 </div>
 
+<!-- ══════════════════════════════════════════════════
+     TAB 3: VISITAS POR VENDEDOR
+══════════════════════════════════════════════════ -->
+<div id="contentVendedores" style="display:none;">
+
+    <!-- Filtros del detalle -->
+    <div class="bg-white rounded-2xl p-4 border shadow-sm mb-5" style="border-color:var(--brd);">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div class="relative">
+                <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none" style="color:var(--t3);">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+                    </svg>
+                </span>
+                <input id="vendSearch" type="text" placeholder="Buscar cliente dentro de las visitas..."
+                    class="w-full pl-10 pr-4 py-2.5 border rounded-xl text-sm outline-none transition"
+                    style="border-color:var(--brd);">
+            </div>
+            <select id="vendSelect" class="w-full px-4 py-2.5 border rounded-xl text-sm outline-none bg-white appearance-none" style="border-color:var(--brd);">
+                <option value="">Todos los vendedores</option>
+            </select>
+        </div>
+        <p class="text-xs mt-3" style="color:var(--t3);">💡 Usa el botón <strong>Copiar lista</strong> de cada vendedor para pegar sus clientes en Excel u otra lista y compararlos.</p>
+    </div>
+
+    <div id="vendedoresDetailList" class="space-y-4">
+        <div class="skeleton h-20 rounded-2xl"></div>
+        <div class="skeleton h-20 rounded-2xl"></div>
+        <div class="skeleton h-20 rounded-2xl"></div>
+    </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     TAB 4: KPIs
+══════════════════════════════════════════════════ -->
+<div id="contentKpis" style="display:none;">
+
+    <!-- Selector de periodo -->
+    <div class="bg-white rounded-2xl p-4 border shadow-sm mb-5 flex items-center justify-between flex-wrap gap-3" style="border-color:var(--brd);">
+        <p class="text-sm font-bold" style="color:var(--t1);">Comparar periodo:</p>
+        <div class="flex gap-2" id="kpiPeriodBtns">
+            <button onclick="setKpiPeriod('dia')" id="kpiBtnDia"
+                class="px-4 py-2 rounded-xl text-xs font-bold transition text-white" style="background:var(--accent);">Hoy vs Ayer</button>
+            <button onclick="setKpiPeriod('semana')" id="kpiBtnSemana"
+                class="px-4 py-2 rounded-xl text-xs font-bold transition" style="background:#f1f5f9;color:var(--t2);">Semana vs Semana</button>
+            <button onclick="setKpiPeriod('mes')" id="kpiBtnMes"
+                class="px-4 py-2 rounded-xl text-xs font-bold transition" style="background:#f1f5f9;color:var(--t2);">Mes vs Mes</button>
+        </div>
+    </div>
+
+    <!-- Resumen general del periodo -->
+    <div id="kpiSummary" class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-5"></div>
+
+    <!-- Comparación por estado -->
+    <div class="bg-white rounded-2xl border shadow-sm mb-5 overflow-hidden" style="border-color:var(--brd);">
+        <div class="flex items-center justify-between px-5 py-4 flex-wrap gap-2" style="border-bottom:1px solid var(--brd);">
+            <div class="flex items-center gap-2">
+                <span class="text-xl">📈</span>
+                <p class="font-black text-base" style="color:var(--t1);">Estados: ¿quién sube y quién baja?</p>
+            </div>
+            <p id="kpiEstadosLabel" class="text-xs font-semibold px-2.5 py-1 rounded-lg" style="background:#eff6ff;color:#1d4ed8;"></p>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead>
+                    <tr style="background:#f8fafc;border-bottom:1px solid var(--brd);">
+                        <th class="text-left px-5 py-3 text-xs font-black uppercase tracking-wider" style="color:var(--t3);">Estado</th>
+                        <th class="text-center px-4 py-3 text-xs font-black uppercase tracking-wider" style="color:var(--accent);">Periodo actual</th>
+                        <th class="text-center px-4 py-3 text-xs font-black uppercase tracking-wider" style="color:var(--t3);">Periodo anterior</th>
+                        <th class="text-center px-4 py-3 text-xs font-black uppercase tracking-wider" style="color:var(--t3);">Variación</th>
+                        <th class="text-center px-4 py-3 text-xs font-black uppercase tracking-wider" style="color:var(--t3);">Tendencia</th>
+                    </tr>
+                </thead>
+                <tbody id="kpiEstadosBody">
+                    <tr><td colspan="5" class="text-center py-8" style="color:var(--t3);">Cargando...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Gráficas: registros por día + días con más representación -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-5">
+        <div class="bg-white rounded-2xl border shadow-sm p-5 flex flex-col" style="border-color:var(--brd);">
+            <p class="text-xs font-black uppercase tracking-widest mb-4" style="color:var(--t3);">Registros por día (últimos 30 días)</p>
+            <div class="relative flex-1 w-full h-64">
+                <canvas id="kpiDailyChart"></canvas>
+            </div>
+        </div>
+        <div class="bg-white rounded-2xl border shadow-sm p-5 flex flex-col" style="border-color:var(--brd);">
+            <p class="text-xs font-black uppercase tracking-widest mb-4" style="color:var(--t3);">Días de la semana con más representación</p>
+            <div id="kpiWeekdayRanking" class="space-y-3 flex-1"></div>
+        </div>
+    </div>
+
+    <!-- Top 5 fechas -->
+    <div class="bg-white rounded-2xl border shadow-sm p-5 mb-5" style="border-color:var(--brd);">
+        <p class="text-xs font-black uppercase tracking-widest mb-4" style="color:var(--t3);">Top 5 fechas con más registros</p>
+        <div id="kpiTopFechas" class="grid grid-cols-1 sm:grid-cols-5 gap-3"></div>
+    </div>
+</div>
+
 </main>
 
 <!-- ══════════════════════════════════════════════════
@@ -486,21 +603,23 @@ function chipHtml(mat) {
 }
 
 // ─── Tabs ─────────────────────────────────────────────────────────────────
+const TABS = ['pop','sorteo','vendedores','kpis'];
+function capTab(s){ return s.charAt(0).toUpperCase() + s.slice(1); }
+
 function switchTab(tab) {
     activeTab = tab;
-    const isPop = tab === 'pop';
-
-    document.getElementById('contentPop').style.display    = isPop ? '' : 'none';
-    document.getElementById('contentSorteo').style.display = isPop ? 'none' : '';
-    document.getElementById('statsPopBanner').classList.toggle('hidden', !isPop);
-    document.getElementById('statsSorteoBanner').classList.toggle('hidden', isPop);
-
-    const btnPop    = document.getElementById('tabBtnPop');
-    const btnSorteo = document.getElementById('tabBtnSorteo');
-    btnPop.classList.toggle('active', isPop);
-    btnPop.style.color = isPop ? 'var(--accent)' : 'var(--t2)';
-    btnSorteo.classList.toggle('active', !isPop);
-    btnSorteo.style.color = !isPop ? 'var(--accent)' : 'var(--t2)';
+    TABS.forEach(t => {
+        const content = document.getElementById('content' + capTab(t));
+        if (content) content.style.display = (t === tab) ? '' : 'none';
+        const btn = document.getElementById('tabBtn' + capTab(t));
+        if (btn) {
+            btn.classList.toggle('active', t === tab);
+            btn.style.color = (t === tab) ? 'var(--accent)' : 'var(--t2)';
+        }
+    });
+    // El banner del sorteo sólo aplica a esa pestaña; el resto usa el banner POP
+    document.getElementById('statsPopBanner').classList.toggle('hidden', tab === 'sorteo');
+    document.getElementById('statsSorteoBanner').classList.toggle('hidden', tab !== 'sorteo');
 }
 
 // ─── Load all ─────────────────────────────────────────────────────────────
@@ -527,6 +646,8 @@ async function loadPop() {
     allData = data || [];
     populateEstados();
     applyFilters();
+    renderVendedoresDetail();
+    renderKpis();
     setLoading(false);
 }
 
@@ -1022,6 +1143,316 @@ function resetFilters(){
     ['searchInput','filterVendedor','filterEstado','filterMaterial'].forEach(id=>document.getElementById(id).value='');
     applyFilters();
 }
+
+// ═══════════════════════════════════════════════════════════════════════
+// TAB 3: VISITAS POR VENDEDOR
+// ═══════════════════════════════════════════════════════════════════════
+let _vendClientesCopy = {}; // idx -> texto de lista de clientes para copiar
+
+function populateVendSelect() {
+    const sel = document.getElementById('vendSelect');
+    const enData = [...new Set(allData.map(r => r.promotor_nombre ? r.promotor_nombre.toUpperCase().trim() : null).filter(Boolean))];
+    const todos = [...new Set([...TODOS_LOS_VENDEDORES, ...enData])].sort();
+    const current = sel.value;
+    sel.innerHTML = '<option value="">Todos los vendedores</option>' +
+        todos.map(v => `<option value="${v}">${v}</option>`).join('');
+    sel.value = current;
+}
+
+function renderVendedoresDetail() {
+    populateVendSelect();
+    const q   = (document.getElementById('vendSearch').value || '').toLowerCase().trim();
+    const sel = document.getElementById('vendSelect').value;
+
+    // Agrupar registros por vendedor
+    const map = {};
+    TODOS_LOS_VENDEDORES.forEach(v => { map[v] = []; });
+    allData.forEach(r => {
+        const k = r.promotor_nombre ? r.promotor_nombre.toUpperCase().trim() : 'SIN NOMBRE';
+        if (!map[k]) map[k] = [];
+        map[k].push(r);
+    });
+
+    let entries = Object.entries(map).sort((a,b) => b[1].length - a[1].length || a[0].localeCompare(b[0]));
+    if (sel) entries = entries.filter(([v]) => v === sel);
+    if (q) {
+        entries = entries
+            .map(([v, regs]) => [v, regs.filter(r => (r.cliente_nombre || '').toLowerCase().includes(q))])
+            .filter(([v, regs]) => regs.length > 0 || v.toLowerCase().includes(q));
+    }
+
+    const el = document.getElementById('vendedoresDetailList');
+    if (!entries.length) {
+        el.innerHTML = `<div class="bg-white rounded-2xl border p-10 text-center" style="border-color:var(--brd);">
+            <p class="font-bold" style="color:var(--t1);">Sin resultados</p>
+            <p class="text-sm mt-1" style="color:var(--t3);">No hay vendedores ni clientes que coincidan con la búsqueda.</p>
+        </div>`;
+        return;
+    }
+
+    _vendClientesCopy = {};
+    const abierto = !!(sel || q); // si está filtrando, expandimos los paneles
+
+    el.innerHTML = entries.map(([v, regs], idx) => {
+        const bg   = nameColor(v);
+        const init = v.slice(0,2).toUpperCase();
+        const sorted = [...regs].sort((a,b) => new Date(b.fecha_creacion) - new Date(a.fecha_creacion));
+        const clientesUnicos = [...new Set(sorted.map(r => (r.cliente_nombre || '—').trim()))];
+        _vendClientesCopy[idx] = clientesUnicos.join('\n');
+
+        const rows = sorted.map((r, j) => {
+            const mats  = r.materiales_entregados || [];
+            const fotos = getPhotos(r).length;
+            return `<tr class="border-t" style="border-color:#f1f5f9; ${j % 2 ? 'background:#fafbfc;' : ''}">
+                <td class="px-4 py-2.5 text-xs font-bold" style="color:var(--t3);font-family:'DM Mono',monospace;">${j+1}</td>
+                <td class="px-4 py-2.5 font-bold text-sm" style="color:var(--t1);">${r.cliente_nombre || '—'}</td>
+                <td class="px-4 py-2.5 text-xs font-semibold" style="color:#1d4ed8;">${r.estado || '—'}</td>
+                <td class="px-4 py-2.5 text-xs whitespace-nowrap" style="color:var(--t2);">${fmtDate(r.fecha_creacion)}</td>
+                <td class="px-4 py-2.5">${mats.length ? `<div class="flex flex-wrap gap-1">${mats.map(chipHtml).join('')}</div>` : '<span class="text-xs italic" style="color:var(--t3);">—</span>'}</td>
+                <td class="px-4 py-2.5 text-center text-xs font-bold" style="color:${fotos ? 'var(--accent)' : 'var(--t3)'};font-family:'DM Mono',monospace;">${fotos || '—'}</td>
+            </tr>`;
+        }).join('');
+
+        const sinVisitas = regs.length === 0;
+
+        return `
+        <details class="bg-white rounded-2xl border shadow-sm overflow-hidden ${sinVisitas ? 'opacity-80' : ''}" style="border-color:${sinVisitas ? '#fecaca' : 'var(--brd)'};" ${abierto && !sinVisitas ? 'open' : ''}>
+            <summary class="flex items-center gap-3 px-5 py-4 cursor-pointer select-none flex-wrap" style="list-style:none; ${sinVisitas ? 'background:#fef2f2;' : ''}">
+                <div class="w-10 h-10 rounded-full flex items-center justify-center text-white font-black text-sm shrink-0" style="background:${bg};">${init}</div>
+                <div class="flex-1 min-w-0">
+                    <p class="font-black text-sm" style="color:${sinVisitas ? '#ef4444' : 'var(--t1)'};">${v} ${sinVisitas ? '⚠️' : ''}</p>
+                    <p class="text-xs" style="color:var(--t3);">${clientesUnicos.length} cliente${clientesUnicos.length !== 1 ? 's' : ''} único${clientesUnicos.length !== 1 ? 's' : ''} · ${regs.length} visita${regs.length !== 1 ? 's' : ''}</p>
+                </div>
+                ${sinVisitas
+                    ? `<span class="text-xs font-bold px-3 py-1.5 rounded-xl" style="background:#fee2e2;color:#b91c1c;">Sin visitas registradas</span>`
+                    : `<button onclick="event.preventDefault();event.stopPropagation();copyClientes(${idx},this)"
+                        class="text-xs font-bold px-3 py-1.5 rounded-xl transition active:scale-95"
+                        style="background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe;">📋 Copiar lista</button>
+                    <span class="text-xs font-semibold px-2 py-1 rounded-lg shrink-0" style="background:#f8fafc;color:var(--t3);">▼ ver detalle</span>`}
+            </summary>
+            ${sinVisitas ? '' : `
+            <div class="px-5 pb-5">
+                <div class="overflow-x-auto rounded-xl border" style="border-color:var(--brd);">
+                    <table class="w-full text-sm">
+                        <thead>
+                            <tr style="background:#f8fafc;border-bottom:1px solid var(--brd);">
+                                <th class="text-left px-4 py-2.5 text-xs font-black uppercase tracking-wider" style="color:var(--t3);">#</th>
+                                <th class="text-left px-4 py-2.5 text-xs font-black uppercase tracking-wider" style="color:var(--t3);">Cliente</th>
+                                <th class="text-left px-4 py-2.5 text-xs font-black uppercase tracking-wider" style="color:var(--t3);">Estado</th>
+                                <th class="text-left px-4 py-2.5 text-xs font-black uppercase tracking-wider" style="color:var(--t3);">Fecha</th>
+                                <th class="text-left px-4 py-2.5 text-xs font-black uppercase tracking-wider" style="color:var(--t3);">Material POP</th>
+                                <th class="text-center px-4 py-2.5 text-xs font-black uppercase tracking-wider" style="color:var(--t3);">Fotos</th>
+                            </tr>
+                        </thead>
+                        <tbody>${rows}</tbody>
+                    </table>
+                </div>
+            </div>`}
+        </details>`;
+    }).join('');
+}
+
+function copyClientes(idx, btn) {
+    const txt = _vendClientesCopy[idx] || '';
+    const done = () => {
+        const orig = btn.innerHTML;
+        btn.innerHTML = '✅ Copiado';
+        setTimeout(() => { btn.innerHTML = orig; }, 1500);
+    };
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(txt).then(done).catch(() => fallbackCopy(txt, done));
+    } else {
+        fallbackCopy(txt, done);
+    }
+}
+function fallbackCopy(txt, done) {
+    const ta = document.createElement('textarea');
+    ta.value = txt; document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); done(); } catch(e) {}
+    document.body.removeChild(ta);
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// TAB 4: KPIs
+// ═══════════════════════════════════════════════════════════════════════
+let kpiPeriod = 'dia';
+let kpiChartInstance = null;
+const DAY_MS = 86400000;
+
+function setKpiPeriod(p) {
+    kpiPeriod = p;
+    [['dia','kpiBtnDia'],['semana','kpiBtnSemana'],['mes','kpiBtnMes']].forEach(([k,id]) => {
+        const b = document.getElementById(id);
+        if (k === p) { b.style.background = 'var(--accent)'; b.style.color = '#fff'; }
+        else { b.style.background = '#f1f5f9'; b.style.color = 'var(--t2)'; }
+    });
+    renderKpis();
+}
+
+function startOfToday() { const d = new Date(); d.setHours(0,0,0,0); return d; }
+function localKey(d) {
+    const x = new Date(d);
+    return `${x.getFullYear()}-${String(x.getMonth()+1).padStart(2,'0')}-${String(x.getDate()).padStart(2,'0')}`;
+}
+
+function renderKpis() {
+    const data = allData.filter(r => r.fecha_creacion);
+    const hoy0 = startOfToday();
+
+    let curStart, prevStart, prevEnd, lblCur, lblPrev;
+    if (kpiPeriod === 'dia') {
+        curStart = hoy0;
+        prevStart = new Date(hoy0 - DAY_MS); prevEnd = hoy0;
+        lblCur = 'Hoy'; lblPrev = 'Ayer';
+    } else if (kpiPeriod === 'semana') {
+        curStart = new Date(hoy0 - 6 * DAY_MS);
+        prevStart = new Date(hoy0 - 13 * DAY_MS); prevEnd = curStart;
+        lblCur = 'Últimos 7 días'; lblPrev = '7 días anteriores';
+    } else {
+        curStart = new Date(hoy0 - 29 * DAY_MS);
+        prevStart = new Date(hoy0 - 59 * DAY_MS); prevEnd = curStart;
+        lblCur = 'Últimos 30 días'; lblPrev = '30 días anteriores';
+    }
+
+    const cur  = data.filter(r => new Date(r.fecha_creacion) >= curStart);
+    const prev = data.filter(r => { const d = new Date(r.fecha_creacion); return d >= prevStart && d < prevEnd; });
+
+    // ── Resumen general ─────────────────────────────────────────
+    const deltaTotal = cur.length - prev.length;
+    const pctTotal = prev.length > 0 ? Math.round((deltaTotal / prev.length) * 100) : (cur.length > 0 ? 100 : 0);
+    const dColor = deltaTotal > 0 ? '#16a34a' : deltaTotal < 0 ? '#dc2626' : 'var(--t3)';
+    const dIcon  = deltaTotal > 0 ? '▲' : deltaTotal < 0 ? '▼' : '＝';
+
+    document.getElementById('kpiSummary').innerHTML = `
+        <div class="bg-white rounded-2xl border shadow-sm p-5 text-center" style="border-color:var(--brd);">
+            <p class="text-xs font-black uppercase tracking-widest mb-2" style="color:var(--accent);">${lblCur}</p>
+            <p class="font-black text-4xl" style="font-family:'DM Mono',monospace;color:var(--t1);">${cur.length}</p>
+            <p class="text-xs font-semibold mt-1" style="color:var(--t3);">registros</p>
+        </div>
+        <div class="bg-white rounded-2xl border shadow-sm p-5 text-center" style="border-color:var(--brd);">
+            <p class="text-xs font-black uppercase tracking-widest mb-2" style="color:var(--t3);">${lblPrev}</p>
+            <p class="font-black text-4xl" style="font-family:'DM Mono',monospace;color:var(--t2);">${prev.length}</p>
+            <p class="text-xs font-semibold mt-1" style="color:var(--t3);">registros</p>
+        </div>
+        <div class="bg-white rounded-2xl border shadow-sm p-5 text-center" style="border-color:var(--brd);">
+            <p class="text-xs font-black uppercase tracking-widest mb-2" style="color:var(--t3);">Variación</p>
+            <p class="font-black text-4xl" style="font-family:'DM Mono',monospace;color:${dColor};">${dIcon} ${Math.abs(pctTotal)}%</p>
+            <p class="text-xs font-semibold mt-1" style="color:${dColor};">${deltaTotal > 0 ? '+' : ''}${deltaTotal} registro${Math.abs(deltaTotal) !== 1 ? 's' : ''}</p>
+        </div>`;
+
+    // ── Comparación por estado ──────────────────────────────────
+    document.getElementById('kpiEstadosLabel').textContent = `${lblCur} vs ${lblPrev}`;
+    const curC = {}, prevC = {};
+    cur.forEach(r => { const e = (r.estado || 'NO DEFINIDO').trim(); curC[e] = (curC[e] || 0) + 1; });
+    prev.forEach(r => { const e = (r.estado || 'NO DEFINIDO').trim(); prevC[e] = (prevC[e] || 0) + 1; });
+    const ests = [...new Set([...Object.keys(curC), ...Object.keys(prevC)])];
+
+    const rows = ests.map(e => {
+        const c = curC[e] || 0, p = prevC[e] || 0, d = c - p;
+        const pct = p > 0 ? Math.round((d / p) * 100) : (c > 0 ? 100 : 0);
+        return { e, c, p, d, pct };
+    }).sort((a,b) => b.d - a.d || b.c - a.c);
+
+    const tbody = document.getElementById('kpiEstadosBody');
+    if (!rows.length) {
+        tbody.innerHTML = '<tr><td colspan="5" class="text-center py-8 text-sm" style="color:var(--t3);">Sin registros en estos periodos.</td></tr>';
+    } else {
+        tbody.innerHTML = rows.map((r, i) => {
+            const up = r.d > 0, down = r.d < 0;
+            const col = up ? '#16a34a' : down ? '#dc2626' : 'var(--t3)';
+            const badge = up
+                ? `<span class="text-xs font-bold px-2.5 py-1 rounded-full" style="background:#f0fdf4;color:#16a34a;border:1px solid #bbf7d0;">▲ Subiendo</span>`
+                : down
+                ? `<span class="text-xs font-bold px-2.5 py-1 rounded-full" style="background:#fef2f2;color:#dc2626;border:1px solid #fecaca;">▼ Bajando</span>`
+                : `<span class="text-xs font-bold px-2.5 py-1 rounded-full" style="background:#f8fafc;color:var(--t3);border:1px solid #e2e8f0;">＝ Estable</span>`;
+            return `<tr class="border-t" style="border-color:#f1f5f9; ${i % 2 ? 'background:#fafbfc;' : ''}">
+                <td class="px-5 py-3 font-bold text-sm" style="color:var(--t1);">${r.e}</td>
+                <td class="px-4 py-3 text-center font-black" style="color:var(--accent);font-family:'DM Mono',monospace;font-size:1.05rem;">${r.c}</td>
+                <td class="px-4 py-3 text-center font-bold" style="color:var(--t3);font-family:'DM Mono',monospace;">${r.p}</td>
+                <td class="px-4 py-3 text-center font-black" style="color:${col};font-family:'DM Mono',monospace;">${r.d > 0 ? '+' : ''}${r.d} <span class="text-xs font-bold">(${r.pct > 0 ? '+' : ''}${r.pct}%)</span></td>
+                <td class="px-4 py-3 text-center">${badge}</td>
+            </tr>`;
+        }).join('');
+    }
+
+    // ── Registros por día (últimos 30 días, gráfica de barras) ──
+    const counts = {};
+    for (let i = 29; i >= 0; i--) {
+        const d = new Date(hoy0 - i * DAY_MS);
+        counts[localKey(d)] = 0;
+    }
+    data.forEach(r => {
+        const k = localKey(r.fecha_creacion);
+        if (k in counts) counts[k]++;
+    });
+    const dias = Object.keys(counts);
+    const labels = dias.map(d => { const p = d.split('-'); return `${p[2]}/${p[1]}`; });
+    const vals = dias.map(d => counts[d]);
+
+    const ctx = document.getElementById('kpiDailyChart').getContext('2d');
+    if (kpiChartInstance) kpiChartInstance.destroy();
+    kpiChartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: { labels, datasets: [{
+            label: 'Registros', data: vals,
+            backgroundColor: 'rgba(14,165,233,.35)',
+            borderColor: '#0ea5e9', borderWidth: 1.5, borderRadius: 4
+        }]},
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { display: false },
+                tooltip: { backgroundColor: '#0b1f35', titleFont: { family: 'Plus Jakarta Sans', size: 13 },
+                    bodyFont: { family: 'DM Mono', size: 13 }, padding: 10, displayColors: false } },
+            scales: {
+                x: { grid: { display: false }, ticks: { font: { family: 'Plus Jakarta Sans', size: 10 }, color: '#94a3b8', maxRotation: 60 } },
+                y: { beginAtZero: true, grid: { borderDash: [4,4], color: '#e2e8f0' },
+                    ticks: { font: { family: 'DM Mono', size: 11 }, color: '#475569', stepSize: 1 } }
+            }
+        }
+    });
+
+    // ── Días de la semana con más representación (todo el histórico) ──
+    const WD = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
+    const wdCounts = {};
+    data.forEach(r => { const w = WD[new Date(r.fecha_creacion).getDay()]; wdCounts[w] = (wdCounts[w] || 0) + 1; });
+    const wdArr = Object.entries(wdCounts).sort((a,b) => b[1] - a[1]);
+    const wdMax = wdArr[0]?.[1] || 1;
+    const wdTotal = data.length || 1;
+    document.getElementById('kpiWeekdayRanking').innerHTML = wdArr.length
+        ? wdArr.map(([w, c], i) => {
+            const pct = Math.round((c / wdMax) * 100);
+            const pctT = Math.round((c / wdTotal) * 100);
+            return `<div class="flex items-center gap-3">
+                <span class="text-xs font-black w-24 shrink-0" style="color:${i === 0 ? 'var(--accent)' : 'var(--t2)'};">${i === 0 ? '⭐ ' : ''}${w}</span>
+                <div class="flex-1 rounded-full overflow-hidden" style="height:18px;background:#f1f5f9;">
+                    <div class="h-full rounded-full transition-all duration-700" style="width:${pct}%;background:${i === 0 ? 'var(--accent)' : 'rgba(14,165,233,.35)'};"></div>
+                </div>
+                <span class="text-sm font-black w-9 text-right shrink-0" style="font-family:'DM Mono',monospace;color:var(--t1);">${c}</span>
+                <span class="text-xs w-10 text-right shrink-0" style="color:var(--t3);">${pctT}%</span>
+            </div>`;
+        }).join('')
+        : '<p class="text-sm" style="color:var(--t3);">Sin datos.</p>';
+
+    // ── Top 5 fechas con más registros ──────────────────────────
+    const allDates = {};
+    data.forEach(r => { const k = localKey(r.fecha_creacion); allDates[k] = (allDates[k] || 0) + 1; });
+    const top = Object.entries(allDates).sort((a,b) => b[1] - a[1]).slice(0, 5);
+    document.getElementById('kpiTopFechas').innerHTML = top.length
+        ? top.map(([d, c], i) => {
+            const dd = new Date(d + 'T12:00:00');
+            return `<div class="rounded-2xl border p-4 text-center" style="border-color:${i === 0 ? '#fcd34d' : 'var(--brd)'};background:${i === 0 ? '#fefce8' : '#fff'};">
+                <p class="text-xs font-bold mb-1" style="color:var(--t3);">${i === 0 ? '🥇 ' : `#${i+1} `}${dd.toLocaleDateString('es-VE',{weekday:'short',day:'numeric',month:'short'})}</p>
+                <p class="font-black text-2xl" style="font-family:'DM Mono',monospace;color:${i === 0 ? 'var(--gold)' : 'var(--t1)'};">${c}</p>
+                <p class="text-xs" style="color:var(--t3);">registros</p>
+            </div>`;
+        }).join('')
+        : '<p class="text-sm sm:col-span-5" style="color:var(--t3);">Sin datos.</p>';
+}
+
+// ─── Listeners pestañas nuevas ─────────────────────────────────────────────
+let _vsd;
+document.getElementById('vendSearch').addEventListener('input', () => { clearTimeout(_vsd); _vsd = setTimeout(renderVendedoresDetail, 250); });
+document.getElementById('vendSelect').addEventListener('change', renderVendedoresDetail);
 
 // ─── Init ──────────────────────────────────────────────────────────────────
 loadAll();
