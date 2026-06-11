@@ -169,6 +169,22 @@
             </svg>
             Evidencias POP
         </button>
+        <button onclick="switchTab('galeria')" id="tabBtnGaleria"
+            class="tab-btn px-5 py-4 text-sm font-bold flex items-center gap-2 transition whitespace-nowrap"
+            style="color:var(--t2);">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+            </svg>
+            Galería
+        </button>
+        <button onclick="switchTab('comercios')" id="tabBtnComercios"
+            class="tab-btn px-5 py-4 text-sm font-bold flex items-center gap-2 transition whitespace-nowrap"
+            style="color:var(--t2);">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+            </svg>
+            Tickets x Comercio
+        </button>
         <button onclick="switchTab('sorteo')" id="tabBtnSorteo"
             class="tab-btn px-5 py-4 text-sm font-bold flex items-center gap-2 transition"
             style="color:var(--t2);">
@@ -261,6 +277,13 @@
         </div>
     </div>
 
+</div>
+
+<!-- ══════════════════════════════════════════════════
+     TAB: GALERÍA DE EVIDENCIAS
+══════════════════════════════════════════════════ -->
+<div id="contentGaleria" style="display:none;">
+
     <!-- Filters -->
     <div class="bg-white rounded-2xl p-4 border shadow-sm mb-5" style="border-color:var(--brd);">
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
@@ -343,6 +366,94 @@
         <button onclick="resetFilters()" class="text-sm font-bold hover:underline" style="color:var(--accent);">Limpiar filtros</button>
     </div>
 </div>
+
+<!-- ══════════════════════════════════════════════════
+     TAB: TICKETS x COMERCIO
+══════════════════════════════════════════════════ -->
+<div id="contentComercios" style="display:none;">
+
+    <!-- Resumen del match -->
+    <div id="cmSummary" class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-5">
+        <div class="skeleton h-24 rounded-2xl"></div>
+        <div class="skeleton h-24 rounded-2xl"></div>
+        <div class="skeleton h-24 rounded-2xl"></div>
+        <div class="skeleton h-24 rounded-2xl"></div>
+    </div>
+
+    <!-- Ranking de vendedores por tickets -->
+    <div class="bg-white rounded-2xl border shadow-sm mb-5 overflow-hidden" style="border-color:var(--brd);">
+        <div class="flex items-center justify-between px-5 py-4 flex-wrap gap-2" style="border-bottom:1px solid var(--brd);">
+            <div class="flex items-center gap-2">
+                <span class="text-xl">🎟️</span>
+                <p class="font-black text-base" style="color:var(--t1);">Ranking de Vendedores por Tickets</p>
+            </div>
+            <p class="text-xs font-semibold px-2.5 py-1 rounded-lg" style="background:#eff6ff;color:#1d4ed8;">tickets registrados en sus comercios · toca un vendedor para ver el detalle</p>
+        </div>
+        <div id="cmVendedoresList" class="p-5 space-y-3">
+            <div class="skeleton h-16 rounded-2xl"></div>
+            <div class="skeleton h-16 rounded-2xl"></div>
+        </div>
+    </div>
+
+    <!-- Oportunidades de impulso -->
+    <div class="bg-white rounded-2xl border shadow-sm mb-5 overflow-hidden" style="border-color:#fecaca;">
+        <div class="flex items-center gap-3 px-5 py-4" style="border-bottom:1px solid #fecaca;background:#fef2f2;">
+            <span class="text-xl">🚀</span>
+            <div>
+                <p class="font-black text-base" style="color:#b91c1c;">Oportunidades de impulso</p>
+                <p class="text-xs font-semibold" style="color:#dc2626;">Comercios con material POP colocado pero pocos o ningún ticket registrado</p>
+            </div>
+        </div>
+        <div id="cmOportunidades" class="p-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
+    </div>
+
+    <!-- Tabla de comercios -->
+    <div class="bg-white rounded-2xl border shadow-sm mb-5 overflow-hidden" style="border-color:var(--brd);">
+        <div class="flex items-center justify-between px-5 py-4 flex-wrap gap-3" style="border-bottom:1px solid var(--brd);">
+            <div class="flex items-center gap-2">
+                <span class="text-xl">🏪</span>
+                <p class="font-black text-base" style="color:var(--t1);">Ranking de Comercios · POP vs Tickets</p>
+            </div>
+            <input id="cmSearch" type="text" placeholder="Buscar comercio o vendedor..."
+                class="px-4 py-2 border rounded-xl text-sm outline-none" style="border-color:var(--brd);min-width:230px;">
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead>
+                    <tr style="background:#f8fafc;border-bottom:1px solid var(--brd);">
+                        <th class="text-left px-4 py-3 text-xs font-black uppercase tracking-wider" style="color:var(--t3);">#</th>
+                        <th class="text-left px-4 py-3 text-xs font-black uppercase tracking-wider" style="color:var(--t3);">Comercio</th>
+                        <th class="text-left px-4 py-3 text-xs font-black uppercase tracking-wider" style="color:var(--t3);">Vendedor</th>
+                        <th class="text-left px-4 py-3 text-xs font-black uppercase tracking-wider" style="color:var(--t3);">Estado</th>
+                        <th class="text-center px-4 py-3 text-xs font-black uppercase tracking-wider" style="color:#16a34a;">Mat. POP</th>
+                        <th class="text-center px-4 py-3 text-xs font-black uppercase tracking-wider" style="color:var(--accent);">Tickets</th>
+                        <th class="text-center px-4 py-3 text-xs font-black uppercase tracking-wider" style="color:#16a34a;">Aprob.</th>
+                        <th class="text-center px-4 py-3 text-xs font-black uppercase tracking-wider" style="color:#d97706;" title="Tickets registrados por cada material POP colocado">Efectividad</th>
+                        <th class="text-center px-4 py-3 text-xs font-black uppercase tracking-wider" style="color:var(--t3);">Semáforo</th>
+                    </tr>
+                </thead>
+                <tbody id="cmTableBody">
+                    <tr><td colspan="9" class="text-center py-8" style="color:var(--t3);">Cargando...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Tickets sin identificar -->
+    <details class="bg-white rounded-2xl border shadow-sm overflow-hidden mb-5" style="border-color:var(--brd);">
+        <summary class="px-5 py-4 cursor-pointer select-none flex items-center gap-2" style="list-style:none;">
+            <span class="text-xl">❓</span>
+            <p class="font-black text-sm flex-1" style="color:var(--t1);">Tickets cuyo comercio no se pudo identificar</p>
+            <span id="cmUnmatchedCount" class="text-xs font-bold px-2.5 py-1 rounded-full" style="background:#fef3c7;color:#b45309;">—</span>
+            <span class="text-xs font-semibold" style="color:var(--t3);">▼</span>
+        </summary>
+        <div class="px-5 pb-5">
+            <p class="text-xs mb-3" style="color:var(--t3);">Nombres escritos por los clientes que no coincidieron con ningún comercio de las visitas POP. Revísalos por si hay que corregirlos o registrar la visita.</p>
+            <div id="cmUnmatched" class="flex flex-wrap gap-2"></div>
+        </div>
+    </details>
+</div>
+
 
 <!-- ══════════════════════════════════════════════════
      TAB 2: SORTEO
@@ -603,7 +714,7 @@ function chipHtml(mat) {
 }
 
 // ─── Tabs ─────────────────────────────────────────────────────────────────
-const TABS = ['pop','sorteo','vendedores','kpis'];
+const TABS = ['pop','galeria','comercios','sorteo','vendedores','kpis'];
 function capTab(s){ return s.charAt(0).toUpperCase() + s.slice(1); }
 
 function switchTab(tab) {
@@ -627,6 +738,8 @@ async function loadAll() {
     spinRefresh(true);
     await loadPop(); 
     await loadSorteo();
+    computeComercios();
+    renderComercios();
     spinRefresh(false);
     const t = new Date();
     const el = document.getElementById('lastUpdate');
@@ -645,6 +758,9 @@ async function loadPop() {
     if (error) { console.error(error); setLoading(false); return; }
     allData = data || [];
     populateEstados();
+    renderBannerStats(allData);
+    renderClientesDistribucionChart(allData);
+    renderRanking(allData);
     applyFilters();
     renderVendedoresDetail();
     renderKpis();
@@ -855,9 +971,8 @@ function applyFilters() {
         return 0;
     });
 
-    renderBannerStats(filtered);
-    renderClientesDistribucionChart(filtered);
-    renderRanking(filtered);
+    document.getElementById('resultsCount').textContent =
+        `${filtered.length} registro${filtered.length!==1?'s':''} encontrado${filtered.length!==1?'s':''}`;
     renderCards(filtered);
 }
 
@@ -870,8 +985,6 @@ function renderBannerStats(data) {
     document.getElementById('statVendedores').textContent = uniqVen;
     document.getElementById('statMateriales').textContent = totalMat;
     document.getElementById('statFotos').textContent     = totalFot;
-    document.getElementById('resultsCount').textContent  =
-        `${data.length} registro${data.length!==1?'s':''} encontrado${data.length!==1?'s':''}`;
 }
 
 // ─── Clientes Distribution bar chart ──────────────────────────────────────
@@ -1449,10 +1562,249 @@ function renderKpis() {
         : '<p class="text-sm sm:col-span-5" style="color:var(--t3);">Sin datos.</p>';
 }
 
+// ═══════════════════════════════════════════════════════════════════════
+// TAB: TICKETS x COMERCIO (normalización + match difuso)
+// ═══════════════════════════════════════════════════════════════════════
+let cmData = null;
+const CM_MATCH_THRESHOLD = 0.6;
+
+// Normaliza un nombre: minúsculas, sin acentos, "n°/nro/#" → "numero", sin símbolos
+function normTxt(s) {
+    return (s || '').toString().toLowerCase()
+        .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+        .replace(/#/g, ' numero ')
+        .replace(/\bn\s*[°ºo]\s*\.?\s*(?=\d)/g, ' numero ')
+        .replace(/\bnro\.?\b/g, ' numero ')
+        .replace(/\bnum\.?\b/g, ' numero ')
+        .replace(/[^a-z0-9\s]/g, ' ')
+        .replace(/\s+/g, ' ').trim();
+}
+const CM_STOP = new Set(['el','la','los','las','de','del','y','e','un','una']);
+function cmTokens(s) { return normTxt(s).split(' ').filter(t => t && !CM_STOP.has(t)); }
+
+// Similitud entre dos nombres (0 a 1): combina solape de palabras y contención
+function simScore(a, b) {
+    const ta = cmTokens(a), tb = cmTokens(b);
+    if (!ta.length || !tb.length) return 0;
+    const sa = new Set(ta), sb = new Set(tb);
+    let inter = 0; sa.forEach(t => { if (sb.has(t)) inter++; });
+    const jaccard  = inter / (sa.size + sb.size - inter);
+    const coverage = inter / Math.min(sa.size, sb.size); // "tiempo abasto numero 2" cubre a "abasto numero 2"
+    const na = normTxt(a).replace(/\s/g, ''), nb = normTxt(b).replace(/\s/g, '');
+    const contains = (na.length > 3 && nb.length > 3 && (na.includes(nb) || nb.includes(na))) ? 1 : 0;
+    return Math.max(jaccard, coverage * 0.92, contains);
+}
+
+// Construye los comercios canónicos (desde POP) y les asigna los tickets
+function computeComercios() {
+    const canonMap = {};
+    allData.forEach(r => {
+        const key = normTxt(r.cliente_nombre);
+        if (!key) return;
+        if (!canonMap[key]) canonMap[key] = {
+            key, nombre: (r.cliente_nombre || '').trim(), estado: r.estado || '—',
+            visitas: 0, materiales: 0, vendCount: {}, tickets: 0, ticketsAprob: 0
+        };
+        const c = canonMap[key];
+        c.visitas++;
+        c.materiales += (r.materiales_entregados || []).length;
+        if (r.estado) c.estado = r.estado;
+        const v = r.promotor_nombre ? r.promotor_nombre.toUpperCase().trim() : 'SIN NOMBRE';
+        c.vendCount[v] = (c.vendCount[v] || 0) + 1;
+    });
+    const canon = Object.values(canonMap);
+    canon.forEach(c => {
+        c.vendedor = Object.entries(c.vendCount).sort((a,b) => b[1] - a[1])[0][0];
+    });
+
+    const unmatched = {};
+    let matched = 0;
+    sorteoTicketsData.forEach(t => {
+        const est = (t.establecimiento || t.comercio || '').toString();
+        let best = null, bs = 0;
+        for (const c of canon) {
+            const sc = simScore(est, c.nombre);
+            if (sc > bs) { bs = sc; best = c; }
+        }
+        if (best && bs >= CM_MATCH_THRESHOLD) {
+            best.tickets++;
+            if (t.estado === 'aprobado') best.ticketsAprob++;
+            matched++;
+        } else {
+            const k = normTxt(est) || '(sin nombre)';
+            if (!unmatched[k]) unmatched[k] = { nombre: est.trim() || '(sin nombre)', count: 0 };
+            unmatched[k].count++;
+        }
+    });
+
+    cmData = {
+        canon,
+        unmatched: Object.values(unmatched).sort((a,b) => b.count - a.count),
+        matched,
+        totalTickets: sorteoTicketsData.length
+    };
+}
+
+// Semáforo de efectividad por comercio
+function cmBadge(c) {
+    const b = (txt, bg, fg, br) => `<span class="text-xs font-bold px-2.5 py-1 rounded-full whitespace-nowrap" style="background:${bg};color:${fg};border:1px solid ${br};">${txt}</span>`;
+    if (c.materiales === 0) return c.tickets > 0
+        ? b('🎟️ Vende sin POP', '#eff6ff', '#1d4ed8', '#bfdbfe')
+        : b('— Sin POP', '#f8fafc', '#94a3b8', '#e2e8f0');
+    if (c.tickets === 0) return b('🚀 Impulsar', '#fef2f2', '#dc2626', '#fecaca');
+    const r = c.tickets / c.materiales;
+    if (r >= 1)   return b('🔥 Alta', '#f0fdf4', '#16a34a', '#bbf7d0');
+    if (r >= 0.5) return b('👍 Media', '#fefce8', '#b45309', '#fde68a');
+    return b('⚠️ Baja', '#fff7ed', '#c2410c', '#fed7aa');
+}
+function cmEff(c) { return c.materiales > 0 ? Math.round((c.tickets / c.materiales) * 100) + '%' : '—'; }
+
+function renderComercios() {
+    if (!cmData) return;
+    const { canon, unmatched, matched, totalTickets } = cmData;
+    const sinMatch = totalTickets - matched;
+    const pctM = totalTickets > 0 ? Math.round((matched / totalTickets) * 100) : 0;
+    const vendiendo = canon.filter(c => c.tickets > 0).length;
+
+    // ── Resumen ─────────────────────────────────────────────────
+    const card = (lbl, val, sub, color) => `
+        <div class="bg-white rounded-2xl border shadow-sm p-5 text-center" style="border-color:var(--brd);">
+            <p class="text-xs font-black uppercase tracking-widest mb-2" style="color:var(--t3);">${lbl}</p>
+            <p class="font-black text-3xl" style="font-family:'DM Mono',monospace;color:${color};">${val}</p>
+            <p class="text-xs font-semibold mt-1" style="color:var(--t3);">${sub}</p>
+        </div>`;
+    document.getElementById('cmSummary').innerHTML =
+        card('Tickets totales', totalTickets, 'registrados en el sorteo', 'var(--t1)') +
+        card('Identificados', matched, `${pctM}% con comercio asignado`, '#16a34a') +
+        card('Sin identificar', sinMatch, 'nombre no coincide', sinMatch > 0 ? '#d97706' : 'var(--t3)') +
+        card('Comercios vendiendo', vendiendo, `de ${canon.length} visitados`, 'var(--accent)');
+
+    // ── Ranking de vendedores por tickets ───────────────────────
+    const vmap = {};
+    canon.forEach(c => {
+        if (!vmap[c.vendedor]) vmap[c.vendedor] = { nombre: c.vendedor, tickets: 0, aprob: 0, materiales: 0, comercios: [] };
+        const v = vmap[c.vendedor];
+        v.tickets += c.tickets; v.aprob += c.ticketsAprob; v.materiales += c.materiales;
+        v.comercios.push(c);
+    });
+    const vend = Object.values(vmap).sort((a,b) => b.tickets - a.tickets || b.materiales - a.materiales);
+
+    document.getElementById('cmVendedoresList').innerHTML = vend.map((v, i) => {
+        const pos = i + 1;
+        const badgeCls = pos === 1 ? 'rank-gold' : pos === 2 ? 'rank-silver' : pos === 3 ? 'rank-bronze' : 'rank-rest';
+        const bg = nameColor(v.nombre), init = v.nombre.slice(0,2).toUpperCase();
+        const eff = v.materiales > 0 ? Math.round((v.tickets / v.materiales) * 100) + '%' : '—';
+        const coms = [...v.comercios].sort((a,b) => b.tickets - a.tickets || b.materiales - a.materiales);
+        const rows = coms.map((c, j) => `
+            <tr class="border-t" style="border-color:#f1f5f9; ${j % 2 ? 'background:#fafbfc;' : ''} ${c.materiales > 0 && c.tickets === 0 ? 'background:#fff1f2;' : ''}">
+                <td class="px-4 py-2.5 font-bold text-sm" style="color:var(--t1);">${c.nombre}</td>
+                <td class="px-4 py-2.5 text-xs font-semibold" style="color:#1d4ed8;">${c.estado}</td>
+                <td class="px-4 py-2.5 text-center font-bold" style="color:#16a34a;font-family:'DM Mono',monospace;">${c.materiales}</td>
+                <td class="px-4 py-2.5 text-center font-black" style="color:${c.tickets > 0 ? 'var(--accent)' : '#dc2626'};font-family:'DM Mono',monospace;">${c.tickets}</td>
+                <td class="px-4 py-2.5 text-center font-bold" style="color:var(--t3);font-family:'DM Mono',monospace;">${c.ticketsAprob}</td>
+                <td class="px-4 py-2.5 text-center font-bold" style="color:#d97706;font-family:'DM Mono',monospace;">${cmEff(c)}</td>
+                <td class="px-4 py-2.5 text-center">${cmBadge(c)}</td>
+            </tr>`).join('');
+
+        return `
+        <details class="rounded-2xl border overflow-hidden" style="border-color:var(--brd);">
+            <summary class="flex items-center gap-3 px-4 py-3.5 cursor-pointer select-none flex-wrap" style="list-style:none;background:${pos === 1 && v.tickets > 0 ? '#fefce8' : '#fff'};">
+                <span class="inline-flex items-center justify-center w-7 h-7 rounded-full text-xs font-black shrink-0 ${badgeCls}">${pos}</span>
+                <div class="w-9 h-9 rounded-full flex items-center justify-center text-white font-black text-sm shrink-0" style="background:${bg};">${init}</div>
+                <div class="flex-1 min-w-0">
+                    <p class="font-black text-sm" style="color:var(--t1);">${v.nombre}</p>
+                    <p class="text-xs" style="color:var(--t3);">${v.comercios.length} comercio${v.comercios.length !== 1 ? 's' : ''} visitado${v.comercios.length !== 1 ? 's' : ''}</p>
+                </div>
+                <div class="flex items-center gap-2 flex-wrap">
+                    <span class="text-xs font-bold px-2.5 py-1 rounded-lg" style="background:#eff6ff;color:#1d4ed8;font-family:'DM Mono',monospace;">🎟️ ${v.tickets}</span>
+                    <span class="text-xs font-bold px-2.5 py-1 rounded-lg" style="background:#f0fdf4;color:#16a34a;font-family:'DM Mono',monospace;">✅ ${v.aprob}</span>
+                    <span class="text-xs font-bold px-2.5 py-1 rounded-lg" style="background:#fefce8;color:#b45309;font-family:'DM Mono',monospace;">📦 ${v.materiales} POP</span>
+                    <span class="text-xs font-bold px-2.5 py-1 rounded-lg" style="background:#f8fafc;color:var(--t2);font-family:'DM Mono',monospace;" title="Tickets por cada material POP colocado">Efect. ${eff}</span>
+                    <span class="text-xs font-semibold" style="color:var(--t3);">▼</span>
+                </div>
+            </summary>
+            <div class="px-4 pb-4">
+                <div class="overflow-x-auto rounded-xl border" style="border-color:var(--brd);">
+                    <table class="w-full text-sm">
+                        <thead>
+                            <tr style="background:#f8fafc;border-bottom:1px solid var(--brd);">
+                                <th class="text-left px-4 py-2.5 text-xs font-black uppercase tracking-wider" style="color:var(--t3);">Comercio</th>
+                                <th class="text-left px-4 py-2.5 text-xs font-black uppercase tracking-wider" style="color:var(--t3);">Estado</th>
+                                <th class="text-center px-4 py-2.5 text-xs font-black uppercase tracking-wider" style="color:#16a34a;">Mat. POP</th>
+                                <th class="text-center px-4 py-2.5 text-xs font-black uppercase tracking-wider" style="color:var(--accent);">Tickets</th>
+                                <th class="text-center px-4 py-2.5 text-xs font-black uppercase tracking-wider" style="color:var(--t3);">Aprob.</th>
+                                <th class="text-center px-4 py-2.5 text-xs font-black uppercase tracking-wider" style="color:#d97706;">Efectividad</th>
+                                <th class="text-center px-4 py-2.5 text-xs font-black uppercase tracking-wider" style="color:var(--t3);">Semáforo</th>
+                            </tr>
+                        </thead>
+                        <tbody>${rows}</tbody>
+                    </table>
+                </div>
+            </div>
+        </details>`;
+    }).join('') || '<p class="text-sm text-center py-6" style="color:var(--t3);">Sin datos.</p>';
+
+    // ── Oportunidades de impulso ────────────────────────────────
+    const opp = canon
+        .filter(c => c.materiales >= 2 && c.tickets === 0)
+        .sort((a,b) => b.materiales - a.materiales)
+        .slice(0, 12);
+    document.getElementById('cmOportunidades').innerHTML = opp.length
+        ? opp.map(c => `
+            <div class="rounded-2xl border p-4" style="border-color:#fecaca;background:#fff;">
+                <p class="font-black text-sm mb-1" style="color:var(--t1);">${c.nombre}</p>
+                <p class="text-xs mb-2" style="color:var(--t3);">${c.estado} · ${c.vendedor}</p>
+                <div class="flex items-center gap-2">
+                    <span class="text-xs font-bold px-2 py-1 rounded-lg" style="background:#fefce8;color:#b45309;font-family:'DM Mono',monospace;">📦 ${c.materiales} POP</span>
+                    <span class="text-xs font-bold px-2 py-1 rounded-lg" style="background:#fef2f2;color:#dc2626;font-family:'DM Mono',monospace;">🎟️ 0 tickets</span>
+                </div>
+            </div>`).join('')
+        : '<p class="text-sm sm:col-span-2 lg:col-span-3" style="color:#16a34a;">✅ No hay comercios con POP colocado y cero tickets. ¡Buen balance!</p>';
+
+    // ── Tabla global + sin identificar ──────────────────────────
+    renderCmTable();
+    document.getElementById('cmUnmatchedCount').textContent =
+        `${sinMatch} ticket${sinMatch !== 1 ? 's' : ''}`;
+    document.getElementById('cmUnmatched').innerHTML = unmatched.length
+        ? unmatched.map(u => `
+            <span class="text-xs font-bold px-3 py-1.5 rounded-xl" style="background:#fffbeb;color:#b45309;border:1px solid #fde68a;">
+                ${u.nombre} <span style="font-family:'DM Mono',monospace;">×${u.count}</span>
+            </span>`).join('')
+        : '<p class="text-sm" style="color:#16a34a;">✅ Todos los tickets quedaron asignados a un comercio.</p>';
+}
+
+function renderCmTable() {
+    if (!cmData) return;
+    const q = (document.getElementById('cmSearch').value || '').toLowerCase().trim();
+    let rows = cmData.canon.filter(c =>
+        !q || c.nombre.toLowerCase().includes(q) || (c.vendedor || '').toLowerCase().includes(q));
+    rows = rows.sort((a,b) => b.tickets - a.tickets || b.materiales - a.materiales);
+
+    const tbody = document.getElementById('cmTableBody');
+    if (!rows.length) {
+        tbody.innerHTML = '<tr><td colspan="9" class="text-center py-8 text-sm" style="color:var(--t3);">Sin comercios que coincidan.</td></tr>';
+        return;
+    }
+    tbody.innerHTML = rows.map((c, i) => `
+        <tr class="border-t" style="border-color:#f1f5f9; ${i % 2 ? 'background:#fafbfc;' : ''} ${c.materiales > 0 && c.tickets === 0 ? 'background:#fff1f2;' : ''}">
+            <td class="px-4 py-3 text-xs font-bold" style="color:var(--t3);font-family:'DM Mono',monospace;">${i + 1}</td>
+            <td class="px-4 py-3 font-bold text-sm" style="color:var(--t1);">${c.nombre}</td>
+            <td class="px-4 py-3 text-xs font-semibold whitespace-nowrap" style="color:var(--t2);">${c.vendedor}</td>
+            <td class="px-4 py-3 text-xs font-semibold" style="color:#1d4ed8;">${c.estado}</td>
+            <td class="px-4 py-3 text-center font-bold" style="color:#16a34a;font-family:'DM Mono',monospace;">${c.materiales}</td>
+            <td class="px-4 py-3 text-center font-black" style="color:${c.tickets > 0 ? 'var(--accent)' : '#dc2626'};font-size:1.05rem;font-family:'DM Mono',monospace;">${c.tickets}</td>
+            <td class="px-4 py-3 text-center font-bold" style="color:var(--t3);font-family:'DM Mono',monospace;">${c.ticketsAprob}</td>
+            <td class="px-4 py-3 text-center font-bold" style="color:#d97706;font-family:'DM Mono',monospace;">${cmEff(c)}</td>
+            <td class="px-4 py-3 text-center">${cmBadge(c)}</td>
+        </tr>`).join('');
+}
+
 // ─── Listeners pestañas nuevas ─────────────────────────────────────────────
 let _vsd;
 document.getElementById('vendSearch').addEventListener('input', () => { clearTimeout(_vsd); _vsd = setTimeout(renderVendedoresDetail, 250); });
 document.getElementById('vendSelect').addEventListener('change', renderVendedoresDetail);
+let _cmd;
+document.getElementById('cmSearch').addEventListener('input', () => { clearTimeout(_cmd); _cmd = setTimeout(renderCmTable, 250); });
 
 // ─── Init ──────────────────────────────────────────────────────────────────
 loadAll();
