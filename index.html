@@ -425,10 +425,10 @@
                         <th class="text-left px-4 py-3 text-xs font-black uppercase tracking-wider" style="color:var(--t3);">Comercio</th>
                         <th class="text-left px-4 py-3 text-xs font-black uppercase tracking-wider" style="color:var(--t3);">Vendedor</th>
                         <th class="text-left px-4 py-3 text-xs font-black uppercase tracking-wider" style="color:var(--t3);">Estado</th>
-                        <th class="text-center px-4 py-3 text-xs font-black uppercase tracking-wider" style="color:#16a34a;">Mat. POP</th>
+                        <th class="text-center px-4 py-3 text-xs font-black uppercase tracking-wider" style="color:#16a34a;">POP (de 5)</th>
                         <th class="text-center px-4 py-3 text-xs font-black uppercase tracking-wider" style="color:var(--accent);">Tickets</th>
                         <th class="text-center px-4 py-3 text-xs font-black uppercase tracking-wider" style="color:#16a34a;">Aprob.</th>
-                        <th class="text-center px-4 py-3 text-xs font-black uppercase tracking-wider" style="color:#d97706;" title="Tickets registrados por cada material POP colocado">Efectividad</th>
+                        <th class="text-center px-4 py-3 text-xs font-black uppercase tracking-wider" style="color:#d97706;" title="Tickets registrados por cada tipo de material POP colocado (máximo 5 tipos por comercio)">Tickets/POP</th>
                         <th class="text-center px-4 py-3 text-xs font-black uppercase tracking-wider" style="color:var(--t3);">Semáforo</th>
                     </tr>
                 </thead>
@@ -1603,11 +1603,12 @@ function computeComercios() {
         if (!key) return;
         if (!canonMap[key]) canonMap[key] = {
             key, nombre: (r.cliente_nombre || '').trim(), estado: r.estado || '—',
-            visitas: 0, materiales: 0, vendCount: {}, tickets: 0, ticketsAprob: 0
+            visitas: 0, materiales: 0, matSet: new Set(), vendCount: {}, tickets: 0, ticketsAprob: 0
         };
         const c = canonMap[key];
         c.visitas++;
         c.materiales += (r.materiales_entregados || []).length;
+        (r.materiales_entregados || []).forEach(m => c.matSet.add(m));
         if (r.estado) c.estado = r.estado;
         const v = r.promotor_nombre ? r.promotor_nombre.toUpperCase().trim() : 'SIN NOMBRE';
         c.vendCount[v] = (c.vendCount[v] || 0) + 1;
@@ -1615,6 +1616,9 @@ function computeComercios() {
     const canon = Object.values(canonMap);
     canon.forEach(c => {
         c.vendedor = Object.entries(c.vendCount).sort((a,b) => b[1] - a[1])[0][0];
+        // Tipos únicos de POP colocados (máximo 5: CENEFA, HABLADOR, AFICHE, DANGLER, ROMPE TRAFICO)
+        c.unicos = MATS_ORDER.filter(m => c.matSet.has(m)).length;
+        c.cobertura = c.unicos / 5;
     });
 
     const unmatched = {};
@@ -1648,16 +1652,26 @@ function computeComercios() {
 // Semáforo de efectividad por comercio
 function cmBadge(c) {
     const b = (txt, bg, fg, br) => `<span class="text-xs font-bold px-2.5 py-1 rounded-full whitespace-nowrap" style="background:${bg};color:${fg};border:1px solid ${br};">${txt}</span>`;
-    if (c.materiales === 0) return c.tickets > 0
+    if (c.unicos === 0) return c.tickets > 0
         ? b('🎟️ Vende sin POP', '#eff6ff', '#1d4ed8', '#bfdbfe')
         : b('— Sin POP', '#f8fafc', '#94a3b8', '#e2e8f0');
     if (c.tickets === 0) return b('🚀 Impulsar', '#fef2f2', '#dc2626', '#fecaca');
-    const r = c.tickets / c.materiales;
+    const r = c.tickets / c.unicos;
     if (r >= 1)   return b('🔥 Alta', '#f0fdf4', '#16a34a', '#bbf7d0');
     if (r >= 0.5) return b('👍 Media', '#fefce8', '#b45309', '#fde68a');
     return b('⚠️ Baja', '#fff7ed', '#c2410c', '#fed7aa');
 }
-function cmEff(c) { return c.materiales > 0 ? Math.round((c.tickets / c.materiales) * 100) + '%' : '—'; }
+// Efectividad = tickets registrados por cada TIPO de material POP colocado (máx. 5 tipos)
+function cmEff(c) { return c.unicos > 0 ? (c.tickets / c.unicos).toFixed(1) + '×' : '—'; }
+// Puntos de cobertura: un punto por cada tipo de POP, coloreado si está colocado
+function cmDots(c) {
+    return '<div class="flex items-center justify-center gap-1 mb-1">' + MATS_ORDER.map(m => {
+        const on  = c.matSet.has(m);
+        const col = (MAT[m] || {}).bar || '#94a3b8';
+        return '<span title="' + m + (on ? '' : ' (falta)') + '" class="w-2.5 h-2.5 rounded-full inline-block" style="background:' + (on ? col : '#e2e8f0') + ';"></span>';
+    }).join('') + '</div>';
+}
+function cmCob(c) { return c.unicos + '/5'; }
 
 function renderComercios() {
     if (!cmData) return;
@@ -1682,24 +1696,26 @@ function renderComercios() {
     // ── Ranking de vendedores por tickets ───────────────────────
     const vmap = {};
     canon.forEach(c => {
-        if (!vmap[c.vendedor]) vmap[c.vendedor] = { nombre: c.vendedor, tickets: 0, aprob: 0, materiales: 0, comercios: [] };
+        if (!vmap[c.vendedor]) vmap[c.vendedor] = { nombre: c.vendedor, tickets: 0, aprob: 0, materiales: 0, unicos: 0, comercios: [] };
         const v = vmap[c.vendedor];
-        v.tickets += c.tickets; v.aprob += c.ticketsAprob; v.materiales += c.materiales;
+        v.tickets += c.tickets; v.aprob += c.ticketsAprob; v.materiales += c.materiales; v.unicos += c.unicos;
         v.comercios.push(c);
     });
-    const vend = Object.values(vmap).sort((a,b) => b.tickets - a.tickets || b.materiales - a.materiales);
+    const vend = Object.values(vmap).sort((a,b) => b.tickets - a.tickets || b.unicos - a.unicos);
 
     document.getElementById('cmVendedoresList').innerHTML = vend.map((v, i) => {
         const pos = i + 1;
         const badgeCls = pos === 1 ? 'rank-gold' : pos === 2 ? 'rank-silver' : pos === 3 ? 'rank-bronze' : 'rank-rest';
         const bg = nameColor(v.nombre), init = v.nombre.slice(0,2).toUpperCase();
-        const eff = v.materiales > 0 ? Math.round((v.tickets / v.materiales) * 100) + '%' : '—';
-        const coms = [...v.comercios].sort((a,b) => b.tickets - a.tickets || b.materiales - a.materiales);
+        const maxPop = v.comercios.length * 5;
+        const cobV   = maxPop > 0 ? Math.round((v.unicos / maxPop) * 100) : 0;
+        const eff    = v.unicos > 0 ? (v.tickets / v.unicos).toFixed(1) + '×' : '—';
+        const coms = [...v.comercios].sort((a,b) => b.tickets - a.tickets || b.unicos - a.unicos);
         const rows = coms.map((c, j) => `
             <tr class="border-t" style="border-color:#f1f5f9; ${j % 2 ? 'background:#fafbfc;' : ''} ${c.materiales > 0 && c.tickets === 0 ? 'background:#fff1f2;' : ''}">
                 <td class="px-4 py-2.5 font-bold text-sm" style="color:var(--t1);">${c.nombre}</td>
                 <td class="px-4 py-2.5 text-xs font-semibold" style="color:#1d4ed8;">${c.estado}</td>
-                <td class="px-4 py-2.5 text-center font-bold" style="color:#16a34a;font-family:'DM Mono',monospace;">${c.materiales}</td>
+                <td class="px-4 py-2.5 text-center">${cmDots(c)}<span class="text-xs font-bold" style="color:#16a34a;font-family:'DM Mono',monospace;">${cmCob(c)}</span></td>
                 <td class="px-4 py-2.5 text-center font-black" style="color:${c.tickets > 0 ? 'var(--accent)' : '#dc2626'};font-family:'DM Mono',monospace;">${c.tickets}</td>
                 <td class="px-4 py-2.5 text-center font-bold" style="color:var(--t3);font-family:'DM Mono',monospace;">${c.ticketsAprob}</td>
                 <td class="px-4 py-2.5 text-center font-bold" style="color:#d97706;font-family:'DM Mono',monospace;">${cmEff(c)}</td>
@@ -1718,8 +1734,8 @@ function renderComercios() {
                 <div class="flex items-center gap-2 flex-wrap">
                     <span class="text-xs font-bold px-2.5 py-1 rounded-lg" style="background:#eff6ff;color:#1d4ed8;font-family:'DM Mono',monospace;">🎟️ ${v.tickets}</span>
                     <span class="text-xs font-bold px-2.5 py-1 rounded-lg" style="background:#f0fdf4;color:#16a34a;font-family:'DM Mono',monospace;">✅ ${v.aprob}</span>
-                    <span class="text-xs font-bold px-2.5 py-1 rounded-lg" style="background:#fefce8;color:#b45309;font-family:'DM Mono',monospace;">📦 ${v.materiales} POP</span>
-                    <span class="text-xs font-bold px-2.5 py-1 rounded-lg" style="background:#f8fafc;color:var(--t2);font-family:'DM Mono',monospace;" title="Tickets por cada material POP colocado">Efect. ${eff}</span>
+                    <span class="text-xs font-bold px-2.5 py-1 rounded-lg" style="background:#fefce8;color:#b45309;font-family:'DM Mono',monospace;" title="Tipos de POP colocados sobre el máximo posible (5 por comercio)">📦 ${v.unicos}/${maxPop} POP (${cobV}%)</span>
+                    <span class="text-xs font-bold px-2.5 py-1 rounded-lg" style="background:#f8fafc;color:var(--t2);font-family:'DM Mono',monospace;" title="Tickets registrados por cada tipo de material POP colocado">Efect. ${eff} tickets/POP</span>
                     <span class="text-xs font-semibold" style="color:var(--t3);">▼</span>
                 </div>
             </summary>
@@ -1730,10 +1746,10 @@ function renderComercios() {
                             <tr style="background:#f8fafc;border-bottom:1px solid var(--brd);">
                                 <th class="text-left px-4 py-2.5 text-xs font-black uppercase tracking-wider" style="color:var(--t3);">Comercio</th>
                                 <th class="text-left px-4 py-2.5 text-xs font-black uppercase tracking-wider" style="color:var(--t3);">Estado</th>
-                                <th class="text-center px-4 py-2.5 text-xs font-black uppercase tracking-wider" style="color:#16a34a;">Mat. POP</th>
+                                <th class="text-center px-4 py-2.5 text-xs font-black uppercase tracking-wider" style="color:#16a34a;">POP (de 5)</th>
                                 <th class="text-center px-4 py-2.5 text-xs font-black uppercase tracking-wider" style="color:var(--accent);">Tickets</th>
                                 <th class="text-center px-4 py-2.5 text-xs font-black uppercase tracking-wider" style="color:var(--t3);">Aprob.</th>
-                                <th class="text-center px-4 py-2.5 text-xs font-black uppercase tracking-wider" style="color:#d97706;">Efectividad</th>
+                                <th class="text-center px-4 py-2.5 text-xs font-black uppercase tracking-wider" style="color:#d97706;" title="Tickets por cada tipo de POP colocado">Tickets/POP</th>
                                 <th class="text-center px-4 py-2.5 text-xs font-black uppercase tracking-wider" style="color:var(--t3);">Semáforo</th>
                             </tr>
                         </thead>
@@ -1746,8 +1762,8 @@ function renderComercios() {
 
     // ── Oportunidades de impulso ────────────────────────────────
     const opp = canon
-        .filter(c => c.materiales >= 2 && c.tickets === 0)
-        .sort((a,b) => b.materiales - a.materiales)
+        .filter(c => c.unicos >= 2 && c.tickets === 0)
+        .sort((a,b) => b.unicos - a.unicos || b.visitas - a.visitas)
         .slice(0, 12);
     document.getElementById('cmOportunidades').innerHTML = opp.length
         ? opp.map(c => `
@@ -1755,7 +1771,7 @@ function renderComercios() {
                 <p class="font-black text-sm mb-1" style="color:var(--t1);">${c.nombre}</p>
                 <p class="text-xs mb-2" style="color:var(--t3);">${c.estado} · ${c.vendedor}</p>
                 <div class="flex items-center gap-2">
-                    <span class="text-xs font-bold px-2 py-1 rounded-lg" style="background:#fefce8;color:#b45309;font-family:'DM Mono',monospace;">📦 ${c.materiales} POP</span>
+                    <span class="text-xs font-bold px-2 py-1 rounded-lg" style="background:#fefce8;color:#b45309;font-family:'DM Mono',monospace;">📦 ${c.unicos}/5 POP</span>
                     <span class="text-xs font-bold px-2 py-1 rounded-lg" style="background:#fef2f2;color:#dc2626;font-family:'DM Mono',monospace;">🎟️ 0 tickets</span>
                 </div>
             </div>`).join('')
@@ -1778,7 +1794,7 @@ function renderCmTable() {
     const q = (document.getElementById('cmSearch').value || '').toLowerCase().trim();
     let rows = cmData.canon.filter(c =>
         !q || c.nombre.toLowerCase().includes(q) || (c.vendedor || '').toLowerCase().includes(q));
-    rows = rows.sort((a,b) => b.tickets - a.tickets || b.materiales - a.materiales);
+    rows = rows.sort((a,b) => b.tickets - a.tickets || b.unicos - a.unicos);
 
     const tbody = document.getElementById('cmTableBody');
     if (!rows.length) {
@@ -1791,7 +1807,7 @@ function renderCmTable() {
             <td class="px-4 py-3 font-bold text-sm" style="color:var(--t1);">${c.nombre}</td>
             <td class="px-4 py-3 text-xs font-semibold whitespace-nowrap" style="color:var(--t2);">${c.vendedor}</td>
             <td class="px-4 py-3 text-xs font-semibold" style="color:#1d4ed8;">${c.estado}</td>
-            <td class="px-4 py-3 text-center font-bold" style="color:#16a34a;font-family:'DM Mono',monospace;">${c.materiales}</td>
+            <td class="px-4 py-3 text-center">${cmDots(c)}<span class="text-xs font-bold" style="color:#16a34a;font-family:'DM Mono',monospace;">${cmCob(c)}</span></td>
             <td class="px-4 py-3 text-center font-black" style="color:${c.tickets > 0 ? 'var(--accent)' : '#dc2626'};font-size:1.05rem;font-family:'DM Mono',monospace;">${c.tickets}</td>
             <td class="px-4 py-3 text-center font-bold" style="color:var(--t3);font-family:'DM Mono',monospace;">${c.ticketsAprob}</td>
             <td class="px-4 py-3 text-center font-bold" style="color:#d97706;font-family:'DM Mono',monospace;">${cmEff(c)}</td>
