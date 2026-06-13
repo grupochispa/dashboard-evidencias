@@ -747,16 +747,29 @@ async function loadAll() {
     el.classList.remove('hidden');
 }
 
+// ─── Paginated fetch (bypasses Supabase 1000-row limit) ───────────────────
+const PAGE_SIZE = 1000;
+async function fetchAll(table, orderCol, ascending = false) {
+    let all = [], from = 0, done = false;
+    while (!done) {
+        const { data, error } = await sb
+            .from(table)
+            .select('*')
+            .order(orderCol, { ascending })
+            .range(from, from + PAGE_SIZE - 1);
+        if (error) { console.error(`fetchAll ${table}:`, error); break; }
+        if (!data || data.length === 0) break;
+        all = all.concat(data);
+        if (data.length < PAGE_SIZE) done = true;
+        else from += PAGE_SIZE;
+    }
+    return all;
+}
+
 // ─── Load POP registros ───────────────────────────────────────────────────
 async function loadPop() {
     setLoading(true);
-    const { data, error } = await sb
-        .from('sorteo_registros')
-        .select('*')
-        .order('fecha_creacion', { ascending: false });
-
-    if (error) { console.error(error); setLoading(false); return; }
-    allData = data || [];
+    allData = await fetchAll('sorteo_registros', 'fecha_creacion', false);
     populateEstados();
     renderBannerStats(allData);
     renderClientesDistribucionChart(allData);
@@ -769,13 +782,7 @@ async function loadPop() {
 
 // ─── Load Sorteo tickets ──────────────────────────────────────────────────
 async function loadSorteo() {
-    const { data, error } = await sb
-        .from('sorteo_tickets')
-        .select('*')
-        .order('creado_en', { ascending: true }); 
-
-    if (error) { console.error('sorteo error:', error); return; }
-    sorteoTicketsData = data || [];
+    sorteoTicketsData = await fetchAll('sorteo_tickets', 'creado_en', true);
     renderSorteoStats(sorteoTicketsData);
     renderSorteoCharts(sorteoTicketsData);
 }
