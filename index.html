@@ -7,11 +7,10 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=DM+Mono:wght@500&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=400;500;600;700;800;900&family=DM+Mono:wght=500&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
-    <!-- Librería para la gráfica de línea de tiempo -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
     <style>
@@ -78,9 +77,6 @@
 </head>
 <body class="antialiased min-h-screen">
 
-<!-- ══════════════════════════════════════════════════
-     HEADER
-══════════════════════════════════════════════════ -->
 <header class="sticky top-0 z-50 shadow-xl" style="background:var(--navy);">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between gap-4">
         <div class="flex items-center gap-3">
@@ -110,12 +106,8 @@
     </div>
 </header>
 
-<!-- ══════════════════════════════════════════════════
-     STATS BANNER (cambia según la pestaña activa)
-══════════════════════════════════════════════════ -->
 <div style="background:var(--navy2); border-bottom:1px solid var(--navy3);">
 
-    <!-- Stats POP -->
     <div id="statsPopBanner" class="max-w-7xl mx-auto px-4 sm:px-6 py-5 grid grid-cols-2 sm:grid-cols-4 gap-4">
         <div class="text-center">
             <p class="text-xs font-bold uppercase tracking-widest mb-2" style="color:#7fb3d3;">Clientes Visitados</p>
@@ -135,7 +127,6 @@
         </div>
     </div>
 
-    <!-- Stats Sorteo -->
     <div id="statsSorteoBanner" class="hidden max-w-7xl mx-auto px-4 sm:px-6 py-5 grid grid-cols-2 sm:grid-cols-4 gap-4">
         <div class="text-center">
             <p class="text-xs font-bold uppercase tracking-widest mb-2" style="color:#7fb3d3;">Total Tickets</p>
@@ -156,9 +147,6 @@
     </div>
 </div>
 
-<!-- ══════════════════════════════════════════════════
-     TAB NAV
-══════════════════════════════════════════════════ -->
 <div class="bg-white border-b sticky top-16 z-40 shadow-sm" style="border-color:var(--brd);">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 flex gap-1 overflow-x-auto">
         <button onclick="switchTab('pop')" id="tabBtnPop"
@@ -214,12 +202,8 @@
 
 <main class="max-w-7xl mx-auto px-4 sm:px-6 py-6">
 
-<!-- ══════════════════════════════════════════════════
-     TAB 1: EVIDENCIAS POP
-══════════════════════════════════════════════════ -->
 <div id="contentPop">
 
-    <!-- Distribucion de Clientes -->
     <div class="bg-white rounded-2xl p-5 border shadow-sm mb-5" style="border-color:var(--brd);">
         <p class="text-xs font-black uppercase tracking-widest mb-4" style="color:var(--t3);">Distribución de Clientes por Estado</p>
         <div id="clientesDistribucionStats" class="space-y-3">
@@ -231,7 +215,6 @@
         </div>
     </div>
 
-    <!-- ── RANKING DE VENDEDORES ─────────────────────────────── -->
     <div class="bg-white rounded-2xl border shadow-sm mb-5 overflow-hidden" style="border-color:var(--brd);">
         <div class="flex items-center justify-between px-5 py-4" style="border-bottom:1px solid var(--brd);">
             <div class="flex items-center gap-2">
@@ -243,14 +226,12 @@
             </p>
         </div>
 
-        <!-- Top 3 podium -->
         <div id="rankingPodium" class="grid grid-cols-1 sm:grid-cols-3 gap-4 p-5">
             <div class="skeleton h-36 rounded-2xl"></div>
             <div class="skeleton h-36 rounded-2xl"></div>
             <div class="skeleton h-36 rounded-2xl"></div>
         </div>
 
-        <!-- Full ranking table -->
         <div class="px-5 pb-5">
             <div class="overflow-x-auto rounded-xl border" style="border-color:var(--brd);">
                 <table class="w-full text-sm" id="rankingTable">
@@ -279,14 +260,10 @@
 
 </div>
 
-<!-- ══════════════════════════════════════════════════
-     TAB: GALERÍA DE EVIDENCIAS
-══════════════════════════════════════════════════ -->
 <div id="contentGaleria" style="display:none;">
 
-    <!-- Filters -->
     <div class="bg-white rounded-2xl p-4 border shadow-sm mb-5" style="border-color:var(--brd);">
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
             <div class="relative sm:col-span-2 lg:col-span-1">
                 <span class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none" style="color:var(--t3);">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -297,6 +274,10 @@
                     class="w-full pl-10 pr-4 py-2.5 border rounded-xl text-sm outline-none transition"
                     style="border-color:var(--brd);">
             </div>
+            <select id="filterFecha" class="w-full px-4 py-2.5 border rounded-xl text-sm outline-none bg-white appearance-none" style="border-color:var(--brd);">
+                <option value="hoy" selected>Solo datos de hoy</option>
+                <option value="todo">Toda la data</option>
+            </select>
             <select id="filterVendedor" class="w-full px-4 py-2.5 border rounded-xl text-sm outline-none bg-white appearance-none" style="border-color:var(--brd);">
                 <option value="">Todos los vendedores</option>
                 <option value="ALEIDY COLINA">Aleidy Colina</option>
@@ -337,7 +318,6 @@
         </div>
     </div>
 
-    <!-- Toolbar -->
     <div class="flex items-center justify-between gap-3 flex-wrap mb-5">
         <p id="resultsCount" class="text-sm font-semibold" style="color:var(--t2);">Cargando...</p>
         <select id="sortBy" onchange="applyFilters()" class="border rounded-xl px-3 py-2 text-sm bg-white outline-none appearance-none" style="border-color:var(--brd);">
@@ -348,13 +328,12 @@
         </select>
     </div>
 
-    <!-- Skeleton -->
     <div id="loadingSkeleton" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5"></div>
 
-    <!-- Cards grid -->
     <div id="registrosGrid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5" style="display:none;"></div>
 
-    <!-- Empty -->
+    <div id="paginationContainer" class="flex justify-center items-center mt-8 mb-4"></div>
+
     <div id="emptyState" style="display:none;" class="text-center py-24">
         <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-4" style="background:#f1f5f9;">
             <svg class="w-8 h-8" style="color:var(--t3);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -367,12 +346,8 @@
     </div>
 </div>
 
-<!-- ══════════════════════════════════════════════════
-     TAB: TICKETS x COMERCIO
-══════════════════════════════════════════════════ -->
 <div id="contentComercios" style="display:none;">
 
-    <!-- Resumen del match -->
     <div id="cmSummary" class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-5">
         <div class="skeleton h-24 rounded-2xl"></div>
         <div class="skeleton h-24 rounded-2xl"></div>
@@ -380,7 +355,6 @@
         <div class="skeleton h-24 rounded-2xl"></div>
     </div>
 
-    <!-- Ranking de vendedores por tickets -->
     <div class="bg-white rounded-2xl border shadow-sm mb-5 overflow-hidden" style="border-color:var(--brd);">
         <div class="flex items-center justify-between px-5 py-4 flex-wrap gap-2" style="border-bottom:1px solid var(--brd);">
             <div class="flex items-center gap-2">
@@ -395,7 +369,6 @@
         </div>
     </div>
 
-    <!-- Oportunidades de impulso -->
     <div class="bg-white rounded-2xl border shadow-sm mb-5 overflow-hidden" style="border-color:#fecaca;">
         <div class="flex items-center gap-3 px-5 py-4" style="border-bottom:1px solid #fecaca;background:#fef2f2;">
             <span class="text-xl">🚀</span>
@@ -407,7 +380,6 @@
         <div id="cmOportunidades" class="p-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3"></div>
     </div>
 
-    <!-- Tabla de comercios -->
     <div class="bg-white rounded-2xl border shadow-sm mb-5 overflow-hidden" style="border-color:var(--brd);">
         <div class="flex items-center justify-between px-5 py-4 flex-wrap gap-3" style="border-bottom:1px solid var(--brd);">
             <div class="flex items-center gap-2">
@@ -439,7 +411,6 @@
         </div>
     </div>
 
-    <!-- Tickets sin identificar -->
     <details class="bg-white rounded-2xl border shadow-sm overflow-hidden mb-5" style="border-color:var(--brd);">
         <summary class="px-5 py-4 cursor-pointer select-none flex items-center gap-2" style="list-style:none;">
             <span class="text-xl">❓</span>
@@ -455,14 +426,9 @@
 </div>
 
 
-<!-- ══════════════════════════════════════════════════
-     TAB 2: SORTEO
-══════════════════════════════════════════════════ -->
 <div id="contentSorteo" style="display:none;">
 
-    <!-- Analytics Charts y Ranking Estados Sorteo -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-5">
-        <!-- Gráfica Histórica de Tickets -->
         <div class="bg-white rounded-2xl border shadow-sm p-5 flex flex-col" style="border-color:var(--brd);">
             <div class="flex items-center justify-between mb-4">
                 <p class="text-xs font-black uppercase tracking-widest" style="color:var(--t3);">Línea de Tiempo (Tickets Diarios)</p>
@@ -472,30 +438,25 @@
             </div>
         </div>
         
-        <!-- Ranking de Estados con mayor volumen -->
         <div class="bg-white rounded-2xl border shadow-sm p-5 flex flex-col" style="border-color:var(--brd);">
             <p class="text-xs font-black uppercase tracking-widest mb-4" style="color:var(--t3);">Ranking por Estado</p>
             <div id="estadosSorteoRanking" class="space-y-4 overflow-y-auto pr-2" style="max-height: 250px;">
-                <!-- Rellenado por JS -->
-            </div>
+                </div>
         </div>
     </div>
 
-    <!-- Big ticket count -->
     <div class="bg-white rounded-2xl border shadow-sm overflow-hidden mb-5" style="border-color:var(--brd);">
         <div class="flex items-center gap-3 px-5 py-4" style="border-bottom:1px solid var(--brd);">
             <span class="text-xl">🎟️</span>
             <p class="font-black text-base" style="color:var(--t1);">Estatus de los Tickets Registrados</p>
         </div>
 
-        <!-- Main number -->
         <div class="flex flex-col items-center justify-center py-12 px-6">
             <p class="text-xs font-black uppercase tracking-widest mb-3" style="color:var(--t3);">Total de tickets procesados</p>
             <p id="bigTicketNum" class="font-black" style="font-size:5rem; line-height:1; font-family:'DM Mono',monospace; color:var(--t1);">—</p>
             <p id="ticketSubtitle" class="text-sm font-semibold mt-3" style="color:var(--t3);">tickets para el sorteo</p>
         </div>
 
-        <!-- Status breakdown -->
         <div class="grid grid-cols-3 gap-0" style="border-top:1px solid var(--brd);">
             <div class="text-center py-6 px-4" style="border-right:1px solid var(--brd);">
                 <p class="text-xs font-black uppercase tracking-widest mb-2" style="color:#16a34a;">Aprobados</p>
@@ -515,7 +476,6 @@
         </div>
     </div>
 
-    <!-- Progress bar -->
     <div class="bg-white rounded-2xl border shadow-sm p-5 mb-5" style="border-color:var(--brd);">
         <p class="text-xs font-black uppercase tracking-widest mb-4" style="color:var(--t3);">Composición del total</p>
         <div id="ticketProgressBar" class="flex rounded-full overflow-hidden h-8 gap-0.5">
@@ -524,7 +484,6 @@
         <div class="flex flex-wrap gap-4 mt-4" id="ticketLegend"></div>
     </div>
 
-    <!-- Ganadores highlight -->
     <div id="ganadoresCard" class="bg-white rounded-2xl border shadow-sm p-6 mb-5" style="border-color:var(--brd);">
         <div class="flex items-center gap-3 mb-2">
             <span class="text-2xl">⭐</span>
@@ -536,12 +495,8 @@
 
 </div>
 
-<!-- ══════════════════════════════════════════════════
-     TAB 3: VISITAS POR VENDEDOR
-══════════════════════════════════════════════════ -->
 <div id="contentVendedores" style="display:none;">
 
-    <!-- Filtros del detalle -->
     <div class="bg-white rounded-2xl p-4 border shadow-sm mb-5" style="border-color:var(--brd);">
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div class="relative">
@@ -568,12 +523,8 @@
     </div>
 </div>
 
-<!-- ══════════════════════════════════════════════════
-     TAB 4: KPIs
-══════════════════════════════════════════════════ -->
 <div id="contentKpis" style="display:none;">
 
-    <!-- Selector de periodo -->
     <div class="bg-white rounded-2xl p-4 border shadow-sm mb-5 flex items-center justify-between flex-wrap gap-3" style="border-color:var(--brd);">
         <p class="text-sm font-bold" style="color:var(--t1);">Comparar periodo:</p>
         <div class="flex gap-2" id="kpiPeriodBtns">
@@ -586,10 +537,8 @@
         </div>
     </div>
 
-    <!-- Resumen general del periodo -->
     <div id="kpiSummary" class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-5"></div>
 
-    <!-- Comparación por estado -->
     <div class="bg-white rounded-2xl border shadow-sm mb-5 overflow-hidden" style="border-color:var(--brd);">
         <div class="flex items-center justify-between px-5 py-4 flex-wrap gap-2" style="border-bottom:1px solid var(--brd);">
             <div class="flex items-center gap-2">
@@ -616,7 +565,6 @@
         </div>
     </div>
 
-    <!-- Gráficas: registros por día + días con más representación -->
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-5">
         <div class="bg-white rounded-2xl border shadow-sm p-5 flex flex-col" style="border-color:var(--brd);">
             <p class="text-xs font-black uppercase tracking-widest mb-4" style="color:var(--t3);">Registros por día (últimos 30 días)</p>
@@ -630,7 +578,6 @@
         </div>
     </div>
 
-    <!-- Top 5 fechas -->
     <div class="bg-white rounded-2xl border shadow-sm p-5 mb-5" style="border-color:var(--brd);">
         <p class="text-xs font-black uppercase tracking-widest mb-4" style="color:var(--t3);">Top 5 fechas con más registros</p>
         <div id="kpiTopFechas" class="grid grid-cols-1 sm:grid-cols-5 gap-3"></div>
@@ -639,9 +586,6 @@
 
 </main>
 
-<!-- ══════════════════════════════════════════════════
-     LIGHTBOX
-══════════════════════════════════════════════════ -->
 <div id="lightbox" class="fixed inset-0 z-[200]" style="background:rgba(5,15,28,.96);">
     <button onclick="closeLightbox()" class="absolute top-4 right-4 z-10 p-2.5 rounded-full transition hover:scale-110" style="background:rgba(255,255,255,.1);">
         <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -659,9 +603,6 @@
     <div id="lbInfo" class="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 text-white text-xs font-semibold px-5 py-2.5 rounded-xl whitespace-nowrap max-w-xs truncate" style="background:rgba(255,255,255,.1);"></div>
 </div>
 
-<!-- ══════════════════════════════════════════════════
-     JAVASCRIPT
-══════════════════════════════════════════════════ -->
 <script>
 const SUPABASE_URL      = 'https://zgbsrbjtjnozpzxifpua.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InpnYnNyYmp0am5venB6eGlmcHVhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQzNjI5MjUsImV4cCI6MjA2OTkzODkyNX0.zHVKe6Ab73PFhQqD3Au94x1Z71hMyRpxE1PCWP8-QTI';
@@ -675,6 +616,10 @@ let sorteoTicketsData = [];
 let lbImages = [], lbIdx = 0, lbCaption = '';
 let activeTab = 'pop';
 let chartInstance = null;
+
+// Paginación DOM
+let gallCurrentPage = 1;
+const GALL_PAGE_SIZE = 24;
 
 // Lista completa de vendedores extraída de las opciones
 const TODOS_LOS_VENDEDORES = [
@@ -728,7 +673,6 @@ function switchTab(tab) {
             btn.style.color = (t === tab) ? 'var(--accent)' : 'var(--t2)';
         }
     });
-    // El banner del sorteo sólo aplica a esa pestaña; el resto usa el banner POP
     document.getElementById('statsPopBanner').classList.toggle('hidden', tab === 'sorteo');
     document.getElementById('statsSorteoBanner').classList.toggle('hidden', tab !== 'sorteo');
 }
@@ -747,7 +691,7 @@ async function loadAll() {
     el.classList.remove('hidden');
 }
 
-// ─── Paginated fetch (bypasses Supabase 1000-row limit) ───────────────────
+// ─── Paginated fetch (Modificado para resolver salto de registros en paginación) ───
 const PAGE_SIZE = 1000;
 async function fetchAll(table, orderCol, ascending = false) {
     let all = [], from = 0, done = false;
@@ -756,6 +700,7 @@ async function fetchAll(table, orderCol, ascending = false) {
             .from(table)
             .select('*')
             .order(orderCol, { ascending })
+            .order('id', { ascending: true }) // Tie-breaker determinista para no saltear renglones duplicados en fecha
             .range(from, from + PAGE_SIZE - 1);
         if (error) { console.error(`fetchAll ${table}:`, error); break; }
         if (!data || data.length === 0) break;
@@ -961,13 +906,21 @@ function applyFilters() {
     const est = document.getElementById('filterEstado').value;
     const mat = document.getElementById('filterMaterial').value;
     const srt = document.getElementById('sortBy').value;
+    const fec = document.getElementById('filterFecha').value;
+
+    const hoyStr = new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD local
 
     filtered = allData.filter(r => {
         const okQ  = !q   || (r.promotor_nombre||'').toLowerCase().includes(q)||(r.cliente_nombre||'').toLowerCase().includes(q);
         const okV  = !ven || r.promotor_nombre === ven;
         const okE  = !est || r.estado === est;
         const okM  = !mat || (r.materiales_entregados||[]).includes(mat);
-        return okQ && okV && okE && okM;
+        
+        let okF = true;
+        if (fec === 'hoy') {
+            okF = r.fecha_creacion && r.fecha_creacion.startsWith(hoyStr);
+        }
+        return okQ && okV && okE && okM && okF;
     });
 
     filtered.sort((a,b) => {
@@ -980,7 +933,9 @@ function applyFilters() {
 
     document.getElementById('resultsCount').textContent =
         `${filtered.length} registro${filtered.length!==1?'s':''} encontrado${filtered.length!==1?'s':''}`;
-    renderCards(filtered);
+    
+    gallCurrentPage = 1;
+    renderCards(false);
 }
 
 // ─── Banner stats (POP tab) ───────────────────────────────────────────────
@@ -991,7 +946,7 @@ function renderBannerStats(data) {
     document.getElementById('statVisitas').textContent   = data.length;
     document.getElementById('statVendedores').textContent = uniqVen;
     document.getElementById('statMateriales').textContent = totalMat;
-    document.getElementById('statFotos').textContent     = totalFot;
+    document.getElementById('statFotos').textContent      = totalFot;
 }
 
 // ─── Clientes Distribution bar chart ──────────────────────────────────────
@@ -1041,7 +996,6 @@ function computeRanking(data) {
         });
         map[k].fotos += getPhotos(r).length;
     });
-    // MODIFICADO: Ordenar primero por visitas (Clientes) y luego por material colocado
     return Object.values(map).sort((a,b) => b.visitas - a.visitas || b.materiales - a.materiales);
 }
 
@@ -1060,7 +1014,7 @@ function renderRanking(data) {
     const podiumMeta  = [
         { medal:'🥈', label:'2.°', cls:'rank-silver', scale:'scale-95' },
         { medal:'🥇', label:'1.°', cls:'rank-gold',   scale:'scale-105' },
-        { medal:'🥉', label:'3.°', cls:'rank-bronze',  scale:'scale-95' },
+        { medal:'🥉', label:'3.°', cls:'rank-bronze', scale:'scale-95' },
     ];
 
     podium.innerHTML = podiumOrder.map((v, i) => {
@@ -1074,7 +1028,7 @@ function renderRanking(data) {
         <div class="rounded-2xl border-2 p-5 flex flex-col items-center text-center ${m.scale} transition-transform relative"
             style="border-color:${i===1?'#fcd34d':i===0?'#cbd5e1':'#fdba74'}; background:${i===1?'#fefce8':i===0?'#f8fafc':'#fff7ed'};">
             <div class="flex items-center gap-2 mb-3">
-                <span class="text-2xl">${m.medal}</span>
+                <span class="text-xl">${m.medal}</span>
                 <span class="text-xs font-black px-2 py-0.5 rounded-full ${m.cls}">${m.label} lugar</span>
             </div>
             <div class="w-12 h-12 rounded-full flex items-center justify-center text-white font-black text-base mb-2"
@@ -1102,13 +1056,10 @@ function renderRanking(data) {
         const bg       = nameColor(v.nombre);
         const init     = v.nombre.slice(0,2).toUpperCase();
         
-        // CÁLCULO PROMEDIO
         const promObj  = v.visitas > 0 ? (v.materiales / v.visitas) : 0;
         const promStr  = promObj.toFixed(1);
 
-        // CONDICIONALES DE ALARMAS
         const inactivoTotal = v.visitas < 5 && v.materiales < 5;
-        // Alerta: Si ha visitado a 5 o más clientes y ha colocado menos de 0.35 de material por visita en promedio
         const alertaBajoMaterial = v.visitas >= 5 && promObj < 0.35;
 
         let rowBg      = i % 2 === 0 ? '' : 'background:#fafbfc;';
@@ -1120,9 +1071,9 @@ function renderRanking(data) {
             nombreColor = '#ef4444';
             alertBadge = `<span title="Inactivo o poco rendimiento" class="ml-1 text-xs">⚠️</span>`;
         } else if (alertaBajoMaterial) {
-            rowBg = 'background:#fff1f2;'; // Rojo más claro/rosado para la alerta de promedio
-            nombreColor = '#be123c'; // Rojo fuerte
-            alertBadge = `<span title="🚨 Baja Colocación POP (Promedio < 0.35)" class="ml-1 text-xs px-2 py-0.5 rounded-full bg-rose-100 text-rose-700 border border-rose-200">🚨 Baja Colocación POP</span>`;
+            rowBg = 'background:#fff1f2;'; 
+            nombreColor = '#be123c'; 
+            alertBadge = `<span title="🚨 Baja Colocación POP (Promedio < 0.35)" class="ml-1 text-xs px-2 py-0.5 rounded-full bg-rose-100 text-rose-700 border border-rose-200">🚨 Baja Colocación</span>`;
         }
 
         return `<tr class="border-t transition" style="border-color:#f1f5f9; ${rowBg}">
@@ -1147,14 +1098,27 @@ function renderRanking(data) {
     }).join('');
 }
 
-// ─── Cards ────────────────────────────────────────────────────────────────
-function renderCards(data) {
+// ─── Cards con paginación limpia basada en DOM ───────────────────────────────
+function renderCards(append = false) {
     const grid  = document.getElementById('registrosGrid');
     const empty = document.getElementById('emptyState');
-    if (!data.length) { grid.style.display='none'; empty.style.display='block'; return; }
-    empty.style.display='none'; grid.style.display='grid';
+    const pagContainer = document.getElementById('paginationContainer');
+    
+    if (!filtered.length) { 
+        grid.style.display='none'; 
+        empty.style.display='block'; 
+        pagContainer.innerHTML = ''; 
+        return; 
+    }
+    empty.style.display='none'; 
+    grid.style.display='grid';
 
-    grid.innerHTML = data.map((r,i) => {
+    const startIdx = append ? (gallCurrentPage - 1) * GALL_PAGE_SIZE : 0;
+    const endIdx = gallCurrentPage * GALL_PAGE_SIZE;
+    const viewChunk = filtered.slice(startIdx, endIdx);
+
+    const cardsHtml = viewChunk.map((r, i) => {
+        const absoluteIdx = startIdx + i; // Referencia global para Lightbox sincronizado
         const fotos   = getPhotos(r);
         const mats    = r.materiales_entregados||[];
         const init    = (r.promotor_nombre||'?').slice(0,2).toUpperCase();
@@ -1162,11 +1126,11 @@ function renderCards(data) {
         const avBg    = nameColor(r.promotor_nombre||'');
         const MAX=5;
         const thumbs  = fotos.slice(0,MAX).map((url,idx)=>`
-            <button onclick="openLightbox(${i},${idx})" class="photo-thumb aspect-square rounded-xl overflow-hidden bg-slate-100 block">
+            <button onclick="openLightbox(${absoluteIdx},${idx})" class="photo-thumb aspect-square rounded-xl overflow-hidden bg-slate-100 block">
                 <img src="${url}" loading="lazy" class="w-full h-full object-cover" onerror="this.style.display='none'">
             </button>`).join('');
         const more = fotos.length>MAX
-            ? `<button onclick="openLightbox(${i},${MAX})" class="photo-thumb aspect-square rounded-xl flex items-center justify-center font-black text-sm text-white" style="background:var(--accent);">+${fotos.length-MAX}</button>` : '';
+            ? `<button onclick="openLightbox(${absoluteIdx},${MAX})" class="photo-thumb aspect-square rounded-xl flex items-center justify-center font-black text-sm text-white" style="background:var(--accent);">+${fotos.length-MAX}</button>` : '';
         const noPhoto = !fotos.length
             ? `<div class="col-span-3 rounded-xl border-2 border-dashed py-5 flex flex-col items-center gap-1.5" style="border-color:#e2e8f0;">
                 <svg class="w-7 h-7" style="color:#cbd5e1;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/></svg>
@@ -1206,6 +1170,27 @@ function renderCards(data) {
             </div>
         </div>`;
     }).join('');
+
+    if (append) {
+        grid.insertAdjacentHTML('beforeend', cardsHtml);
+    } else {
+        grid.innerHTML = cardsHtml;
+    }
+
+    if (endIdx < filtered.length) {
+        pagContainer.innerHTML = `
+            <button onclick="loadNextGallPage()" class="px-6 py-3 bg-white text-sm font-bold border rounded-xl shadow-sm hover:bg-slate-50 transition active:scale-95" style="color:var(--accent); border-color:var(--brd);">
+                Mostrar más resultados (${filtered.length - endIdx} restantes)
+            </button>
+        `;
+    } else {
+        pagContainer.innerHTML = '';
+    }
+}
+
+function loadNextGallPage() {
+    gallCurrentPage++;
+    renderCards(true);
 }
 
 // ─── Lightbox ─────────────────────────────────────────────────────────────
@@ -1257,17 +1242,18 @@ function spinRefresh(on){document.getElementById('refreshIcon').style.animation=
 // ─── Filter listeners ──────────────────────────────────────────────────────
 let _sd;
 document.getElementById('searchInput').addEventListener('input',()=>{clearTimeout(_sd);_sd=setTimeout(applyFilters,250);});
-['filterVendedor','filterEstado','filterMaterial'].forEach(id=>document.getElementById(id).addEventListener('change',applyFilters));
+['filterVendedor','filterEstado','filterMaterial','filterFecha'].forEach(id=>document.getElementById(id).addEventListener('change',applyFilters));
 
 function resetFilters(){
     ['searchInput','filterVendedor','filterEstado','filterMaterial'].forEach(id=>document.getElementById(id).value='');
+    document.getElementById('filterFecha').value = 'todo';
     applyFilters();
 }
 
 // ═══════════════════════════════════════════════════════════════════════
 // TAB 3: VISITAS POR VENDEDOR
 // ═══════════════════════════════════════════════════════════════════════
-let _vendClientesCopy = {}; // idx -> texto de lista de clientes para copiar
+let _vendClientesCopy = {}; 
 
 function populateVendSelect() {
     const sel = document.getElementById('vendSelect');
@@ -1284,7 +1270,6 @@ function renderVendedoresDetail() {
     const q   = (document.getElementById('vendSearch').value || '').toLowerCase().trim();
     const sel = document.getElementById('vendSelect').value;
 
-    // Agrupar registros por vendedor
     const map = {};
     TODOS_LOS_VENDEDORES.forEach(v => { map[v] = []; });
     allData.forEach(r => {
@@ -1311,7 +1296,7 @@ function renderVendedoresDetail() {
     }
 
     _vendClientesCopy = {};
-    const abierto = !!(sel || q); // si está filtrando, expandimos los paneles
+    const abierto = !!(sel || q);
 
     el.innerHTML = entries.map(([v, regs], idx) => {
         const bg   = nameColor(v);
@@ -1393,7 +1378,7 @@ function fallbackCopy(txt, done) {
 }
 
 // ═══════════════════════════════════════════════════════════════════════
-// TAB 4: KPIs
+// TAB 4: KPIs (Corregido mes calendario y bugs de cálculo)
 // ═══════════════════════════════════════════════════════════════════════
 let kpiPeriod = 'dia';
 let kpiChartInstance = null;
@@ -1422,22 +1407,23 @@ function renderKpis() {
     let curStart, prevStart, prevEnd, lblCur, lblPrev;
     if (kpiPeriod === 'dia') {
         curStart = hoy0;
-        prevStart = new Date(hoy0 - DAY_MS); prevEnd = hoy0;
+        prevStart = new Date(hoy0.getTime() - DAY_MS); prevEnd = hoy0;
         lblCur = 'Hoy'; lblPrev = 'Ayer';
     } else if (kpiPeriod === 'semana') {
-        curStart = new Date(hoy0 - 6 * DAY_MS);
-        prevStart = new Date(hoy0 - 13 * DAY_MS); prevEnd = curStart;
+        curStart = new Date(hoy0.getTime() - 6 * DAY_MS);
+        prevStart = new Date(hoy0.getTime() - 13 * DAY_MS); prevEnd = curStart;
         lblCur = 'Últimos 7 días'; lblPrev = '7 días anteriores';
     } else {
-        curStart = new Date(hoy0 - 29 * DAY_MS);
-        prevStart = new Date(hoy0 - 59 * DAY_MS); prevEnd = curStart;
-        lblCur = 'Últimos 30 días'; lblPrev = '30 días anteriores';
+        // CORRECCIÓN MES: Compara estrictamente Mes Calendario Completo Actual vs Mes Anterior
+        curStart = new Date(hoy0.getFullYear(), hoy0.getMonth(), 1);
+        prevStart = new Date(hoy0.getFullYear(), hoy0.getMonth() - 1, 1);
+        prevEnd = curStart;
+        lblCur = 'Mes actual'; lblPrev = 'Mes anterior';
     }
 
     const cur  = data.filter(r => new Date(r.fecha_creacion) >= curStart);
     const prev = data.filter(r => { const d = new Date(r.fecha_creacion); return d >= prevStart && d < prevEnd; });
 
-    // ── Resumen general ─────────────────────────────────────────
     const deltaTotal = cur.length - prev.length;
     const pctTotal = prev.length > 0 ? Math.round((deltaTotal / prev.length) * 100) : (cur.length > 0 ? 100 : 0);
     const dColor = deltaTotal > 0 ? '#16a34a' : deltaTotal < 0 ? '#dc2626' : 'var(--t3)';
@@ -1460,7 +1446,6 @@ function renderKpis() {
             <p class="text-xs font-semibold mt-1" style="color:${dColor};">${deltaTotal > 0 ? '+' : ''}${deltaTotal} registro${Math.abs(deltaTotal) !== 1 ? 's' : ''}</p>
         </div>`;
 
-    // ── Comparación por estado ──────────────────────────────────
     document.getElementById('kpiEstadosLabel').textContent = `${lblCur} vs ${lblPrev}`;
     const curC = {}, prevC = {};
     cur.forEach(r => { const e = (r.estado || 'NO DEFINIDO').trim(); curC[e] = (curC[e] || 0) + 1; });
@@ -1495,10 +1480,9 @@ function renderKpis() {
         }).join('');
     }
 
-    // ── Registros por día (últimos 30 días, gráfica de barras) ──
     const counts = {};
     for (let i = 29; i >= 0; i--) {
-        const d = new Date(hoy0 - i * DAY_MS);
+        const d = new Date(hoy0.getTime() - i * DAY_MS);
         counts[localKey(d)] = 0;
     }
     data.forEach(r => {
@@ -1531,7 +1515,6 @@ function renderKpis() {
         }
     });
 
-    // ── Días de la semana con más representación (todo el histórico) ──
     const WD = ['Domingo','Lunes','Martes','Miércoles','Jueves','Viernes','Sábado'];
     const wdCounts = {};
     data.forEach(r => { const w = WD[new Date(r.fecha_creacion).getDay()]; wdCounts[w] = (wdCounts[w] || 0) + 1; });
@@ -1553,7 +1536,6 @@ function renderKpis() {
         }).join('')
         : '<p class="text-sm" style="color:var(--t3);">Sin datos.</p>';
 
-    // ── Top 5 fechas con más registros ──────────────────────────
     const allDates = {};
     data.forEach(r => { const k = localKey(r.fecha_creacion); allDates[k] = (allDates[k] || 0) + 1; });
     const top = Object.entries(allDates).sort((a,b) => b[1] - a[1]).slice(0, 5);
@@ -1570,12 +1552,11 @@ function renderKpis() {
 }
 
 // ═══════════════════════════════════════════════════════════════════════
-// TAB: TICKETS x COMERCIO (normalización + match difuso)
+// TAB: TICKETS x COMERCIO (Normalización y Match Difuso Completo)
 // ═══════════════════════════════════════════════════════════════════════
 let cmData = null;
 const CM_MATCH_THRESHOLD = 0.6;
 
-// Normaliza un nombre: minúsculas, sin acentos, "n°/nro/#" → "numero", sin símbolos
 function normTxt(s) {
     return (s || '').toString().toLowerCase()
         .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
@@ -1589,20 +1570,18 @@ function normTxt(s) {
 const CM_STOP = new Set(['el','la','los','las','de','del','y','e','un','una']);
 function cmTokens(s) { return normTxt(s).split(' ').filter(t => t && !CM_STOP.has(t)); }
 
-// Similitud entre dos nombres (0 a 1): combina solape de palabras y contención
 function simScore(a, b) {
     const ta = cmTokens(a), tb = cmTokens(b);
     if (!ta.length || !tb.length) return 0;
     const sa = new Set(ta), sb = new Set(tb);
     let inter = 0; sa.forEach(t => { if (sb.has(t)) inter++; });
     const jaccard  = inter / (sa.size + sb.size - inter);
-    const coverage = inter / Math.min(sa.size, sb.size); // "tiempo abasto numero 2" cubre a "abasto numero 2"
+    const coverage = inter / Math.min(sa.size, sb.size);
     const na = normTxt(a).replace(/\s/g, ''), nb = normTxt(b).replace(/\s/g, '');
     const contains = (na.length > 3 && nb.length > 3 && (na.includes(nb) || nb.includes(na))) ? 1 : 0;
     return Math.max(jaccard, coverage * 0.92, contains);
 }
 
-// Construye los comercios canónicos (desde POP) y les asigna los tickets
 function computeComercios() {
     const canonMap = {};
     allData.forEach(r => {
@@ -1620,10 +1599,10 @@ function computeComercios() {
         const v = r.promotor_nombre ? r.promotor_nombre.toUpperCase().trim() : 'SIN NOMBRE';
         c.vendCount[v] = (c.vendCount[v] || 0) + 1;
     });
+    
     const canon = Object.values(canonMap);
     canon.forEach(c => {
         c.vendedor = Object.entries(c.vendCount).sort((a,b) => b[1] - a[1])[0][0];
-        // Tipos únicos de POP colocados (máximo 5: CENEFA, HABLADOR, AFICHE, DANGLER, ROMPE TRAFICO)
         c.unicos = MATS_ORDER.filter(m => c.matSet.has(m)).length;
         c.cobertura = c.unicos / 5;
     });
@@ -1656,7 +1635,6 @@ function computeComercios() {
     };
 }
 
-// Semáforo de efectividad por comercio
 function cmBadge(c) {
     const b = (txt, bg, fg, br) => `<span class="text-xs font-bold px-2.5 py-1 rounded-full whitespace-nowrap" style="background:${bg};color:${fg};border:1px solid ${br};">${txt}</span>`;
     if (c.unicos === 0) return c.tickets > 0
@@ -1668,9 +1646,7 @@ function cmBadge(c) {
     if (r >= 0.5) return b('👍 Media', '#fefce8', '#b45309', '#fde68a');
     return b('⚠️ Baja', '#fff7ed', '#c2410c', '#fed7aa');
 }
-// Efectividad = tickets registrados por cada TIPO de material POP colocado (máx. 5 tipos)
 function cmEff(c) { return c.unicos > 0 ? (c.tickets / c.unicos).toFixed(1) + '×' : '—'; }
-// Puntos de cobertura: un punto por cada tipo de POP, coloreado si está colocado
 function cmDots(c) {
     return '<div class="flex items-center justify-center gap-1 mb-1">' + MATS_ORDER.map(m => {
         const on  = c.matSet.has(m);
@@ -1687,7 +1663,6 @@ function renderComercios() {
     const pctM = totalTickets > 0 ? Math.round((matched / totalTickets) * 100) : 0;
     const vendiendo = canon.filter(c => c.tickets > 0).length;
 
-    // ── Resumen ─────────────────────────────────────────────────
     const card = (lbl, val, sub, color) => `
         <div class="bg-white rounded-2xl border shadow-sm p-5 text-center" style="border-color:var(--brd);">
             <p class="text-xs font-black uppercase tracking-widest mb-2" style="color:var(--t3);">${lbl}</p>
@@ -1700,7 +1675,6 @@ function renderComercios() {
         card('Sin identificar', sinMatch, 'nombre no coincide', sinMatch > 0 ? '#d97706' : 'var(--t3)') +
         card('Comercios vendiendo', vendiendo, `de ${canon.length} visitados`, 'var(--accent)');
 
-    // ── Ranking de vendedores por tickets ───────────────────────
     const vmap = {};
     canon.forEach(c => {
         if (!vmap[c.vendedor]) vmap[c.vendedor] = { nombre: c.vendedor, tickets: 0, aprob: 0, materiales: 0, unicos: 0, comercios: [] };
@@ -1767,7 +1741,6 @@ function renderComercios() {
         </details>`;
     }).join('') || '<p class="text-sm text-center py-6" style="color:var(--t3);">Sin datos.</p>';
 
-    // ── Oportunidades de impulso ────────────────────────────────
     const opp = canon
         .filter(c => c.unicos >= 2 && c.tickets === 0)
         .sort((a,b) => b.unicos - a.unicos || b.visitas - a.visitas)
@@ -1784,10 +1757,8 @@ function renderComercios() {
             </div>`).join('')
         : '<p class="text-sm sm:col-span-2 lg:col-span-3" style="color:#16a34a;">✅ No hay comercios con POP colocado y cero tickets. ¡Buen balance!</p>';
 
-    // ── Tabla global + sin identificar ──────────────────────────
     renderCmTable();
-    document.getElementById('cmUnmatchedCount').textContent =
-        `${sinMatch} ticket${sinMatch !== 1 ? 's' : ''}`;
+    document.getElementById('cmUnmatchedCount').textContent = `${sinMatch} ticket${sinMatch !== 1 ? 's' : ''}`;
     document.getElementById('cmUnmatched').innerHTML = unmatched.length
         ? unmatched.map(u => `
             <span class="text-xs font-bold px-3 py-1.5 rounded-xl" style="background:#fffbeb;color:#b45309;border:1px solid #fde68a;">
@@ -1822,14 +1793,14 @@ function renderCmTable() {
         </tr>`).join('');
 }
 
-// ─── Listeners pestañas nuevas ─────────────────────────────────────────────
+// ─── Listeners pestañas adicionales ─────────────────────────────────────────────
 let _vsd;
 document.getElementById('vendSearch').addEventListener('input', () => { clearTimeout(_vsd); _vsd = setTimeout(renderVendedoresDetail, 250); });
 document.getElementById('vendSelect').addEventListener('change', renderVendedoresDetail);
 let _cmd;
 document.getElementById('cmSearch').addEventListener('input', () => { clearTimeout(_cmd); _cmd = setTimeout(renderCmTable, 250); });
 
-// ─── Init ──────────────────────────────────────────────────────────────────
+// ─── Init Bootstrap ────────────────────────────────────────────────────────
 loadAll();
 </script>
 </body>
