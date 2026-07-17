@@ -12,6 +12,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
     <style>
         :root {
@@ -172,6 +173,14 @@
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
             </svg>
             Tickets x Comercio
+        </button>
+        <button onclick="switchTab('asignar')" id="tabBtnAsignar"
+            class="tab-btn px-5 py-4 text-sm font-bold flex items-center gap-2 transition whitespace-nowrap"
+            style="color:var(--t2);">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+            </svg>
+            Asignar Tickets
         </button>
         <button onclick="switchTab('sorteo')" id="tabBtnSorteo"
             class="tab-btn px-5 py-4 text-sm font-bold flex items-center gap-2 transition"
@@ -348,6 +357,26 @@
 
 <div id="contentComercios" style="display:none;">
 
+    <div class="bg-white rounded-2xl p-4 border shadow-sm mb-5" style="border-color:var(--brd);">
+        <div class="flex items-end gap-3 flex-wrap">
+            <div class="flex flex-col">
+                <label class="text-xs font-bold uppercase tracking-wider mb-1" style="color:var(--t3);">Tickets desde</label>
+                <input id="cmFechaDesde" type="date"
+                    class="px-3 py-2 border rounded-xl text-sm outline-none bg-white"
+                    style="border-color:var(--brd);">
+            </div>
+            <div class="flex flex-col">
+                <label class="text-xs font-bold uppercase tracking-wider mb-1" style="color:var(--t3);">Tickets hasta</label>
+                <input id="cmFechaHasta" type="date"
+                    class="px-3 py-2 border rounded-xl text-sm outline-none bg-white"
+                    style="border-color:var(--brd);">
+            </div>
+            <button onclick="limpiarRangoFechas()" class="px-4 py-2 rounded-xl text-xs font-bold border transition"
+                style="border-color:var(--brd);color:var(--t2);background:#fff;">Limpiar fechas</button>
+            <p id="cmRangoInfo" class="text-xs font-semibold ml-auto self-center" style="color:var(--t3);"></p>
+        </div>
+    </div>
+
     <div id="cmSummary" class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-5">
         <div class="skeleton h-24 rounded-2xl"></div>
         <div class="skeleton h-24 rounded-2xl"></div>
@@ -361,7 +390,14 @@
                 <span class="text-xl">🎟️</span>
                 <p class="font-black text-base" style="color:var(--t1);">Ranking de Vendedores por Tickets</p>
             </div>
-            <p class="text-xs font-semibold px-2.5 py-1 rounded-lg" style="background:#eff6ff;color:#1d4ed8;">tickets registrados en sus comercios · toca un vendedor para ver el detalle</p>
+            <div class="flex items-center gap-2 flex-wrap">
+                <p class="text-xs font-semibold px-2.5 py-1 rounded-lg" style="background:#eff6ff;color:#1d4ed8;">tickets registrados en sus comercios · toca un vendedor para ver el detalle</p>
+                <button onclick="exportarComerciosExcel()" class="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition active:scale-95"
+                    style="background:#f0fdf4;color:#16a34a;border:1px solid #bbf7d0;" title="Exportar todo el reporte de Tickets x Comercio a Excel (hojas: Vendedores, Comercios, Oportunidades)">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                    Exportar Excel
+                </button>
+            </div>
         </div>
         <div id="cmVendedoresList" class="p-5 space-y-3">
             <div class="skeleton h-16 rounded-2xl"></div>
@@ -386,8 +422,15 @@
                 <span class="text-xl">🏪</span>
                 <p class="font-black text-base" style="color:var(--t1);">Ranking de Comercios · POP vs Tickets</p>
             </div>
-            <input id="cmSearch" type="text" placeholder="Buscar comercio o vendedor..."
-                class="px-4 py-2 border rounded-xl text-sm outline-none" style="border-color:var(--brd);min-width:230px;">
+            <div class="flex items-center gap-2 flex-wrap">
+                <input id="cmSearch" type="text" placeholder="Buscar comercio o vendedor..."
+                    class="px-4 py-2 border rounded-xl text-sm outline-none" style="border-color:var(--brd);min-width:230px;">
+                <button onclick="exportarComerciosExcel()" class="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition active:scale-95"
+                    style="background:#f0fdf4;color:#16a34a;border:1px solid #bbf7d0;" title="Exportar tabla visible a Excel">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                    Exportar Excel
+                </button>
+            </div>
         </div>
         <div class="overflow-x-auto">
             <table class="w-full text-sm">
@@ -426,7 +469,112 @@
 </div>
 
 
+<div id="contentAsignar" style="display:none;">
+
+    <div class="bg-white rounded-2xl p-4 border shadow-sm mb-5" style="border-color:var(--brd);">
+        <div class="flex items-end gap-3 flex-wrap">
+            <div class="flex flex-col">
+                <label class="text-xs font-bold uppercase tracking-wider mb-1" style="color:var(--t3);">Tickets desde</label>
+                <input id="asFechaDesde" type="date"
+                    class="px-3 py-2 border rounded-xl text-sm outline-none bg-white"
+                    style="border-color:var(--brd);">
+            </div>
+            <div class="flex flex-col">
+                <label class="text-xs font-bold uppercase tracking-wider mb-1" style="color:var(--t3);">Tickets hasta</label>
+                <input id="asFechaHasta" type="date"
+                    class="px-3 py-2 border rounded-xl text-sm outline-none bg-white"
+                    style="border-color:var(--brd);">
+            </div>
+            <button onclick="limpiarRangoFechas()" class="px-4 py-2 rounded-xl text-xs font-bold border transition"
+                style="border-color:var(--brd);color:var(--t2);background:#fff;">Limpiar fechas</button>
+            <div class="flex items-center gap-2 ml-auto">
+                <input id="asSearch" type="text" placeholder="Buscar establecimiento..."
+                    class="px-4 py-2 border rounded-xl text-sm outline-none" style="border-color:var(--brd);min-width:220px;">
+                <button onclick="exportarHuerfanosExcel()" class="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition active:scale-95"
+                    style="background:#f0fdf4;color:#16a34a;border:1px solid #bbf7d0;" title="Exportar huérfanos a Excel">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                    Exportar Excel
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div id="asSummary" class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-5">
+        <div class="skeleton h-24 rounded-2xl"></div>
+        <div class="skeleton h-24 rounded-2xl"></div>
+        <div class="skeleton h-24 rounded-2xl"></div>
+        <div class="skeleton h-24 rounded-2xl"></div>
+    </div>
+
+    <div class="bg-white rounded-2xl border shadow-sm mb-5 overflow-hidden" style="border-color:var(--brd);">
+        <div class="flex items-center gap-3 px-5 py-4" style="border-bottom:1px solid var(--brd);background:#fffbeb;">
+            <span class="text-xl">🧭</span>
+            <div class="flex-1">
+                <p class="font-black text-base" style="color:#b45309;">Tickets huérfanos · asignación manual</p>
+                <p class="text-xs font-semibold" style="color:#d97706;">
+                    Comercios que vendieron tickets sin una visita POP que los identifique (umbral de coincidencia 0.9).
+                    Asigna cada uno al vendedor responsable. Si en el estado del ticket hay un único vendedor con visitas, se sugiere automáticamente.
+                </p>
+            </div>
+        </div>
+        <div id="asHuerfanosList" class="p-5 space-y-3">
+            <div class="skeleton h-20 rounded-2xl"></div>
+            <div class="skeleton h-20 rounded-2xl"></div>
+        </div>
+    </div>
+
+    <div class="bg-white rounded-2xl border shadow-sm mb-5 overflow-hidden" style="border-color:var(--brd);">
+        <div class="flex items-center gap-3 px-5 py-4" style="border-bottom:1px solid var(--brd);">
+            <span class="text-xl">✅</span>
+            <p class="font-black text-base" style="color:var(--t1);">Asignaciones guardadas</p>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-sm">
+                <thead>
+                    <tr style="background:#f8fafc;border-bottom:1px solid var(--brd);">
+                        <th class="text-left px-4 py-3 text-xs font-black uppercase tracking-wider" style="color:var(--t3);">Establecimiento</th>
+                        <th class="text-left px-4 py-3 text-xs font-black uppercase tracking-wider" style="color:var(--t3);">Estado</th>
+                        <th class="text-left px-4 py-3 text-xs font-black uppercase tracking-wider" style="color:var(--t3);">Vendedor asignado</th>
+                        <th class="text-center px-4 py-3 text-xs font-black uppercase tracking-wider" style="color:var(--t3);">Tickets en rango</th>
+                        <th class="text-left px-4 py-3 text-xs font-black uppercase tracking-wider" style="color:var(--t3);">Actualizado</th>
+                        <th class="text-center px-4 py-3 text-xs font-black uppercase tracking-wider" style="color:var(--t3);">Acción</th>
+                    </tr>
+                </thead>
+                <tbody id="asAsignadasBody">
+                    <tr><td colspan="6" class="text-center py-8" style="color:var(--t3);">Cargando...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+
 <div id="contentSorteo" style="display:none;">
+
+    <div class="bg-white rounded-2xl p-4 border shadow-sm mb-5" style="border-color:var(--brd);">
+        <div class="flex items-end gap-3 flex-wrap">
+            <div class="flex flex-col">
+                <label class="text-xs font-bold uppercase tracking-wider mb-1" style="color:var(--t3);">Tickets desde</label>
+                <input id="srFechaDesde" type="date"
+                    class="px-3 py-2 border rounded-xl text-sm outline-none bg-white"
+                    style="border-color:var(--brd);">
+            </div>
+            <div class="flex flex-col">
+                <label class="text-xs font-bold uppercase tracking-wider mb-1" style="color:var(--t3);">Tickets hasta</label>
+                <input id="srFechaHasta" type="date"
+                    class="px-3 py-2 border rounded-xl text-sm outline-none bg-white"
+                    style="border-color:var(--brd);">
+            </div>
+            <button onclick="limpiarRangoFechas()" class="px-4 py-2 rounded-xl text-xs font-bold border transition"
+                style="border-color:var(--brd);color:var(--t2);background:#fff;">Limpiar fechas</button>
+            <button onclick="exportarSorteoExcel()" class="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition active:scale-95"
+                style="background:#f0fdf4;color:#16a34a;border:1px solid #bbf7d0;" title="Exportar tickets del rango a Excel">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                Exportar Excel
+            </button>
+            <p id="srRangoInfo" class="text-xs font-semibold ml-auto self-center" style="color:var(--t3);"></p>
+        </div>
+    </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-5">
         <div class="bg-white rounded-2xl border shadow-sm p-5 flex flex-col" style="border-color:var(--brd);">
@@ -613,9 +761,33 @@ const sb = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 let allData  = [];
 let filtered = [];
 let sorteoTicketsData = [];
+let asignacionesData = [];      // filas de la tabla ticket_asignaciones en Supabase
+let asignacionesMap  = {};      // comercio_key (o nombre normalizado) -> { vendedor, estado, ... }
 let lbImages = [], lbIdx = 0, lbCaption = '';
 let activeTab = 'pop';
 let chartInstance = null;
+
+// Filtros de rango de fecha para tickets (Comercios, Sorteo y Asignar).
+// Vacíos = sin filtro (toda la data). Formato YYYY-MM-DD.
+let fechaDesde = '';
+let fechaHasta = '';
+
+// Nombre del operador que firma las asignaciones manuales (campo
+// `asignado_por` en ticket_asignaciones). Se puede setear desde la
+// consola del navegador si se desea auditar quién asigna cada ticket.
+let asignado_por = null;
+
+// Devuelve los tickets aplicando el rango de fechas activo (sobre creado_en).
+function ticketsEnRango() {
+    if (!fechaDesde && !fechaHasta) return sorteoTicketsData;
+    const desdeTs = fechaDesde ? new Date(fechaDesde + 'T00:00:00').getTime() : -Infinity;
+    const hastaTs = fechaHasta ? new Date(fechaHasta + 'T23:59:59').getTime() : Infinity;
+    return sorteoTicketsData.filter(t => {
+        if (!t.creado_en) return false;
+        const ts = new Date(t.creado_en).getTime();
+        return ts >= desdeTs && ts <= hastaTs;
+    });
+}
 
 // Paginación DOM
 let gallCurrentPage = 1;
@@ -659,7 +831,7 @@ function chipHtml(mat) {
 }
 
 // ─── Tabs ─────────────────────────────────────────────────────────────────
-const TABS = ['pop','galeria','comercios','sorteo','vendedores','kpis'];
+const TABS = ['pop','galeria','comercios','asignar','sorteo','vendedores','kpis'];
 function capTab(s){ return s.charAt(0).toUpperCase() + s.slice(1); }
 
 function switchTab(tab) {
@@ -680,10 +852,17 @@ function switchTab(tab) {
 // ─── Load all ─────────────────────────────────────────────────────────────
 async function loadAll() {
     spinRefresh(true);
-    await loadPop(); 
-    await loadSorteo();
+    // Carga en paralelo: registros POP, tickets y asignaciones manuales.
+    // Antes se hacía secuencial (loadPop → loadSorteo) lo que duplicaba el
+    // tiempo total de carga. Ahora ambas peticiones viajan a la vez.
+    await Promise.all([
+        loadPop(),
+        loadSorteo(),
+        loadAsignaciones()
+    ]);
     computeComercios();
     renderComercios();
+    renderAsignar();
     spinRefresh(false);
     const t = new Date();
     const el = document.getElementById('lastUpdate');
@@ -693,16 +872,50 @@ async function loadAll() {
 
 // ─── Paginated fetch (Modificado para resolver salto de registros en paginación) ───
 const PAGE_SIZE = 1000;
-async function fetchAll(table, orderCol, ascending = false) {
-    let all = [], from = 0, done = false;
+
+// Columnas que realmente usa el dashboard. Seleccionar solo estas mejora
+// el payload y reduce tiempos de respuesta frente a `select('*')`.
+const COLS_REGISTROS = 'id,fecha_creacion,promotor_nombre,cliente_nombre,estado,materiales_entregados,fotos_urls,foto_url';
+const COLS_TICKETS   = 'id,creado_en,establecimiento,estado,estado_comercio,es_ganador';
+// Esquema real de la tabla ticket_asignaciones (ya existente en Supabase).
+const COLS_ASIGN     = 'id,ticket_id,nombre_original,comercio_key,vendedor_asignado,estado_comercio,asignado_por,asignado_en';
+
+async function fetchAll(table, orderCol, ascending = false, columns = '*') {
+    let all = [], from = 0, done = false, fallbackToStar = false;
     while (!done) {
+        // Si un intento anterior falló por columnas inexistentes (400),
+        // caemos a select('*') para no romper la carga del dashboard.
+        const selectCols = fallbackToStar ? '*' : columns;
         const { data, error } = await sb
             .from(table)
-            .select('*')
+            .select(selectCols)
             .order(orderCol, { ascending })
             .order('id', { ascending: true }) // Tie-breaker determinista para no saltear renglones duplicados en fecha
             .range(from, from + PAGE_SIZE - 1);
-        if (error) { console.error(`fetchAll ${table}:`, error); break; }
+        if (error) {
+            // Reintentar con select('*') si la consulta con columnas específicas
+            // falla en la primera página. Cubre:
+            //   - 42703: columna inexistente (PostgreSQL)
+            //   - PGRST116: error de PostgREST por columnas inválidas
+            //   - status 400 devuelto por el SDK
+            const esErrorColumnas =
+                error.code === '42703' ||
+                error.code === 'PGRST116' ||
+                error.status === 400 ||
+                (typeof error.message === 'string' && /does not exist|column/i.test(error.message));
+            if (esErrorColumnas && !fallbackToStar && from === 0) {
+                console.warn(`fetchAll ${table}: columnas específicas fallaron. Detalle:`, {
+                    code: error.code,
+                    message: error.message,
+                    hint: error.hint,
+                    details: error.details
+                }, `. Reintentando con select('*').`);
+                fallbackToStar = true;
+                continue;
+            }
+            console.error(`fetchAll ${table}:`, error);
+            break;
+        }
         if (!data || data.length === 0) break;
         all = all.concat(data);
         if (data.length < PAGE_SIZE) done = true;
@@ -714,7 +927,7 @@ async function fetchAll(table, orderCol, ascending = false) {
 // ─── Load POP registros ───────────────────────────────────────────────────
 async function loadPop() {
     setLoading(true);
-    allData = await fetchAll('sorteo_registros', 'fecha_creacion', false);
+    allData = await fetchAll('sorteo_registros', 'fecha_creacion', false, COLS_REGISTROS);
     populateEstados();
     renderBannerStats(allData);
     renderClientesDistribucionChart(allData);
@@ -727,9 +940,117 @@ async function loadPop() {
 
 // ─── Load Sorteo tickets ──────────────────────────────────────────────────
 async function loadSorteo() {
-    sorteoTicketsData = await fetchAll('sorteo_tickets', 'creado_en', true);
-    renderSorteoStats(sorteoTicketsData);
-    renderSorteoCharts(sorteoTicketsData);
+    sorteoTicketsData = await fetchAll('sorteo_tickets', 'creado_en', true, COLS_TICKETS);
+    refrescarSorteo();
+}
+
+// Re-renderiza stats y charts del tab Sorteo aplicando el rango de fechas.
+function refrescarSorteo() {
+    const tickets = ticketsEnRango();
+    renderSorteoStats(tickets);
+    renderSorteoCharts(tickets);
+}
+
+// Re-renderiza todo lo que depende del rango de fechas de tickets.
+// Se invoca al cambiar los inputs de fecha en Comercios / Sorteo / Asignar.
+function onRangoFechasTickets() {
+    // Recalcular comercios + huérfanos con el nuevo rango
+    computeComercios();
+    renderComercios();
+    renderAsignar();
+    // Refrescar tab sorteo
+    refrescarSorteo();
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// ASIGNACIONES MANUALES DE TICKETS HUÉRFANOS (tabla: ticket_asignaciones)
+// ═══════════════════════════════════════════════════════════════════════
+// Persistencia en Supabase de las asignaciones que el operador hace desde
+// el panel "Asignar Tickets". Cada fila vincula un nombre de
+// establecimiento (con su key normalizada en `comercio_key`) con el
+// vendedor responsable.
+//
+// Esquema real (ya existente):
+//   ticket_asignaciones(
+//     id bigserial pk,
+//     ticket_id bigint null,           -- null = asignación por nombre
+//     nombre_original text not null,
+//     comercio_key text null,          -- nombre normalizado
+//     vendedor_asignado text null,
+//     estado_comercio text null,
+//     asignado_por text null,
+//     asignado_en timestamptz default now(),
+//     unique (nombre_original, estado_comercio)
+//   )
+
+// Indexa las asignaciones por `comercio_key` (o, si es null, por la
+// normalización de `nombre_original`). Es la clave que usa computeComercios
+// para hacer override del vendedor de un comercio.
+function _keyAsignacion(a) {
+    return a.comercio_key || normTxt(a.nombre_original);
+}
+
+async function loadAsignaciones() {
+    try {
+        const { data, error } = await sb
+            .from('ticket_asignaciones')
+            .select(COLS_ASIGN)
+            .order('asignado_en', { ascending: false });
+        if (error) {
+            console.warn('ticket_asignaciones no disponible:', error.message);
+            asignacionesData = [];
+            asignacionesMap = {};
+            return;
+        }
+        asignacionesData = data || [];
+        asignacionesMap = {};
+        (asignacionesData).forEach(a => {
+            asignacionesMap[_keyAsignacion(a)] = a;
+        });
+    } catch (e) {
+        console.warn('loadAsignaciones error:', e);
+        asignacionesData = [];
+        asignacionesMap = {};
+    }
+}
+
+async function saveAsignacion(nombreOriginal, vendedor, estado) {
+    const nombreNorm = normTxt(nombreOriginal);
+    if (!nombreNorm) return { error: 'nombre vacío' };
+    const payload = {
+        nombre_original: nombreOriginal.trim(),
+        comercio_key: nombreNorm,
+        vendedor_asignado: vendedor,
+        estado_comercio: estado || null,
+        asignado_por: asignado_por || null
+    };
+    // upsert usando el unique compuesto (nombre_original, estado_comercio)
+    const { data, error } = await sb
+        .from('ticket_asignaciones')
+        .upsert(payload, { onConflict: 'nombre_original,estado_comercio' })
+        .select(COLS_ASIGN);
+    if (error) { console.error('saveAsignacion:', error); return { error }; }
+    // Recargar para sincronizar estado local
+    await loadAsignaciones();
+    return { data };
+}
+
+async function deleteAsignacion(nombreNorm) {
+    // Buscar la asignación local para obtener nombre_original + estado_comercio
+    // (la PK lógica es el unique compuesto, no la key normalizada).
+    const a = asignacionesMap[nombreNorm];
+    if (!a) { console.warn('deleteAsignacion: no encontrada', nombreNorm); return { error: 'no encontrada' }; }
+    let q = sb.from('ticket_asignaciones').delete();
+    if (a.estado_comercio) {
+        q = q.eq('nombre_original', a.nombre_original).eq('estado_comercio', a.estado_comercio);
+    } else {
+        // estado_comercio null: eq con null no funciona en PostgREST, usar is null
+        q = q.eq('nombre_original', a.nombre_original).is('estado_comercio', null);
+    }
+    const { error } = await q;
+    if (error) { console.error('deleteAsignacion:', error); return { error }; }
+    await loadAsignaciones();
+    return {};
 }
 
 // Renderiza gráfica y ranking en Sorteo
@@ -1555,10 +1876,21 @@ function renderKpis() {
 // TAB: TICKETS x COMERCIO (Normalización y Match Difuso Completo)
 // ═══════════════════════════════════════════════════════════════════════
 let cmData = null;
-const CM_MATCH_THRESHOLD = 0.6;
+// Umbral subido a 0.9: solo se considera "match exacto" (casi idéntico).
+// Los tickets que no alcancen este umbral quedan como HUÉRFANOS y se
+// gestionan manualmente desde el panel "Asignar Tickets".
+const CM_MATCH_THRESHOLD = 0.9;
 
+// Caché de normalización: normTxt se invierte miles de veces en el
+// matching difuso. Memoizar evita recalcular el mismo string repetidas
+// veces y reduce el tiempo de computeComercios de forma notable.
+const _normCache = new Map();
 function normTxt(s) {
-    return (s || '').toString().toLowerCase()
+    if (s == null) return '';
+    const key = (typeof s === 'string') ? s : String(s);
+    const cached = _normCache.get(key);
+    if (cached !== undefined) return cached;
+    const out = key.toLowerCase()
         .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
         .replace(/#/g, ' numero ')
         .replace(/\bn\s*[°ºo]\s*\.?\s*(?=\d)/g, ' numero ')
@@ -1566,6 +1898,8 @@ function normTxt(s) {
         .replace(/\bnum\.?\b/g, ' numero ')
         .replace(/[^a-z0-9\s]/g, ' ')
         .replace(/\s+/g, ' ').trim();
+    _normCache.set(key, out);
+    return out;
 }
 const CM_STOP = new Set(['el','la','los','las','de','del','y','e','un','una']);
 function cmTokens(s) { return normTxt(s).split(' ').filter(t => t && !CM_STOP.has(t)); }
@@ -1589,7 +1923,8 @@ function computeComercios() {
         if (!key) return;
         if (!canonMap[key]) canonMap[key] = {
             key, nombre: (r.cliente_nombre || '').trim(), estado: r.estado || '—',
-            visitas: 0, materiales: 0, matSet: new Set(), vendCount: {}, tickets: 0, ticketsAprob: 0
+            visitas: 0, materiales: 0, matSet: new Set(), vendCount: {}, tickets: 0, ticketsAprob: 0,
+            origen: 'visita' // 'visita' | 'asignacion'
         };
         const c = canonMap[key];
         c.visitas++;
@@ -1599,18 +1934,79 @@ function computeComercios() {
         const v = r.promotor_nombre ? r.promotor_nombre.toUpperCase().trim() : 'SIN NOMBRE';
         c.vendCount[v] = (c.vendCount[v] || 0) + 1;
     });
-    
+
+    // ── Aplicar asignaciones manuales como override ──────────────────
+    // Cada asignación puede: (a) sobrescribir el vendedor de un comercio
+    // ya visitado, o (b) crear un comercio "virtual" para un establecimiento
+    // que nunca recibió visita POP pero sí vende tickets.
+    (asignacionesData || []).forEach(a => {
+        const key = _keyAsignacion(a);
+        if (!key) return;
+        if (!canonMap[key]) {
+            canonMap[key] = {
+                key, nombre: a.nombre_original || key,
+                estado: a.estado_comercio || '—',
+                visitas: 0, materiales: 0, matSet: new Set(),
+                vendCount: {}, tickets: 0, ticketsAprob: 0,
+                origen: 'asignacion'
+            };
+        } else if (canonMap[key].origen !== 'asignacion') {
+            canonMap[key].origen = 'mixto';
+        }
+        canonMap[key].vendedorForzado = a.vendedor_asignado;
+        canonMap[key].asignacionId = a.id;
+    });
+
     const canon = Object.values(canonMap);
     canon.forEach(c => {
-        c.vendedor = Object.entries(c.vendCount).sort((a,b) => b[1] - a[1])[0][0];
+        // El vendedor forzado por asignación manual tiene prioridad absoluta.
+        if (c.vendedorForzado) {
+            c.vendedor = c.vendedorForzado;
+        } else if (Object.keys(c.vendCount).length) {
+            c.vendedor = Object.entries(c.vendCount).sort((a,b) => b[1] - a[1])[0][0];
+        } else {
+            c.vendedor = 'SIN VENDEDOR';
+        }
         c.unicos = MATS_ORDER.filter(m => c.matSet.has(m)).length;
         c.cobertura = c.unicos / 5;
     });
 
+    // ── Pre-calcular vendedores por estado (para sugerencias) ─────────
+    // Un vendedor "pertenece" a un estado si tiene al menos 1 visita POP
+    // registrada en ese estado.
+    const vendedoresPorEstado = {};
+    allData.forEach(r => {
+        if (!r.estado || !r.promotor_nombre) return;
+        const e = r.estado.trim();
+        const v = r.promotor_nombre.toUpperCase().trim();
+        if (!vendedoresPorEstado[e]) vendedoresPorEstado[e] = new Set();
+        vendedoresPorEstado[e].add(v);
+    });
+
+    // ── Matching de tickets contra canon (umbral 0.9) ─────────────────
     const unmatched = {};
+    const huerfanosMap = {}; // key normalizada -> grupo de tickets huérfanos
     let matched = 0;
-    sorteoTicketsData.forEach(t => {
+
+    const ticketsRango = ticketsEnRango();
+    const totalTicketsRango = ticketsRango.length;
+
+    ticketsRango.forEach(t => {
         const est = (t.establecimiento || t.comercio || '').toString();
+        const estNorm = normTxt(est) || '(sin nombre)';
+
+        // 1) ¿Existe asignación manual exacta para este establecimiento?
+        if (asignacionesMap[estNorm]) {
+            const c = canonMap[estNorm];
+            if (c) {
+                c.tickets++;
+                if (t.estado === 'aprobado') c.ticketsAprob++;
+                matched++;
+                return;
+            }
+        }
+
+        // 2) Matching difuso contra comercios visitados/asignados
         let best = null, bs = 0;
         for (const c of canon) {
             const sc = simScore(est, c.nombre);
@@ -1621,17 +2017,61 @@ function computeComercios() {
             if (t.estado === 'aprobado') best.ticketsAprob++;
             matched++;
         } else {
-            const k = normTxt(est) || '(sin nombre)';
-            if (!unmatched[k]) unmatched[k] = { nombre: est.trim() || '(sin nombre)', count: 0 };
-            unmatched[k].count++;
+            // Huérfano: no matcheó casi-exactamente ningún comercio.
+            // Se agrupa por nombre normalizado para asignación manual.
+            if (!huerfanosMap[estNorm]) {
+                huerfanosMap[estNorm] = {
+                    nombre: est.trim() || '(sin nombre)',
+                    nombreNorm: estNorm,
+                    count: 0,
+                    tickets: [],
+                    estado: '',
+                    sugerencia: null,
+                    asignado: asignacionesMap[estNorm] || null
+                };
+            }
+            const g = huerfanosMap[estNorm];
+            g.count++;
+            g.tickets.push(t);
+
+            // Determinar estado del ticket para la sugerencia
+            let estTicket = t.estado_comercio;
+            if (!estTicket) {
+                const popMatch = allData.find(p =>
+                    p.cliente_nombre && p.cliente_nombre.toLowerCase().trim() === est.toLowerCase().trim()
+                );
+                if (popMatch && popMatch.estado) estTicket = popMatch.estado;
+            }
+            estTicket = estTicket ? estTicket.trim() : '';
+            if (estTicket && !g.estado) g.estado = estTicket;
+
+            // También alimentar unmatched (legacy, para la sección existente)
+            if (!unmatched[estNorm]) unmatched[estNorm] = { nombre: est.trim() || '(sin nombre)', count: 0 };
+            unmatched[estNorm].count++;
+        }
+    });
+
+    // ── Calcular sugerencia por estado para cada grupo huérfano ───────
+    Object.values(huerfanosMap).forEach(g => {
+        if (g.asignado) return; // ya tiene asignación manual
+        const vens = g.estado ? vendedoresPorEstado[g.estado] : null;
+        if (vens && vens.size === 1) {
+            g.sugerencia = [...vens][0];
+        } else if (vens && vens.size > 1) {
+            g.sugerencia = null; // ambiguo: más de un vendedor en el estado
+        } else {
+            g.sugerencia = null; // sin datos de estado
         }
     });
 
     cmData = {
         canon,
         unmatched: Object.values(unmatched).sort((a,b) => b.count - a.count),
+        huerfanos: Object.values(huerfanosMap).sort((a,b) => b.count - a.count),
         matched,
-        totalTickets: sorteoTicketsData.length
+        totalTickets: totalTicketsRango,
+        totalTicketsGlobal: sorteoTicketsData.length,
+        vendedoresPorEstado
     };
 }
 
@@ -1658,7 +2098,7 @@ function cmCob(c) { return c.unicos + '/5'; }
 
 function renderComercios() {
     if (!cmData) return;
-    const { canon, unmatched, matched, totalTickets } = cmData;
+    const { canon, unmatched, matched, totalTickets, totalTicketsGlobal } = cmData;
     const sinMatch = totalTickets - matched;
     const pctM = totalTickets > 0 ? Math.round((matched / totalTickets) * 100) : 0;
     const vendiendo = canon.filter(c => c.tickets > 0).length;
@@ -1670,7 +2110,7 @@ function renderComercios() {
             <p class="text-xs font-semibold mt-1" style="color:var(--t3);">${sub}</p>
         </div>`;
     document.getElementById('cmSummary').innerHTML =
-        card('Tickets totales', totalTickets, 'registrados en el sorteo', 'var(--t1)') +
+        card('Tickets en rango', totalTickets, totalTicketsGlobal !== totalTickets ? `de ${totalTicketsGlobal} totales` : 'registrados en el sorteo', 'var(--t1)') +
         card('Identificados', matched, `${pctM}% con comercio asignado`, '#16a34a') +
         card('Sin identificar', sinMatch, 'nombre no coincide', sinMatch > 0 ? '#d97706' : 'var(--t3)') +
         card('Comercios vendiendo', vendiendo, `de ${canon.length} visitados`, 'var(--accent)');
@@ -1799,6 +2239,359 @@ document.getElementById('vendSearch').addEventListener('input', () => { clearTim
 document.getElementById('vendSelect').addEventListener('change', renderVendedoresDetail);
 let _cmd;
 document.getElementById('cmSearch').addEventListener('input', () => { clearTimeout(_cmd); _cmd = setTimeout(renderCmTable, 250); });
+
+// ═══════════════════════════════════════════════════════════════════════
+// TAB: ASIGNAR TICKETS (huérfanos + asignaciones manuales)
+// ═══════════════════════════════════════════════════════════════════════
+
+// Lista de vendedores para los <select> del panel de asignación.
+function vendedoresOptions(selected) {
+    const enData = [...new Set(allData.map(r => r.promotor_nombre ? r.promotor_nombre.toUpperCase().trim() : null).filter(Boolean))];
+    const todos = [...new Set([...TODOS_LOS_VENDEDORES, ...enData])].sort();
+    return '<option value="">— sin asignar —</option>' +
+        todos.map(v => `<option value="${v}" ${v === selected ? 'selected' : ''}>${v}</option>`).join('');
+}
+
+function renderAsignar() {
+    if (!cmData) return;
+    const { huerfanos, totalTickets, totalTicketsGlobal, matched } = cmData;
+    const sinAsignar = huerfanos.filter(g => !g.asignado).length;
+    const yaAsignados = huerfanos.filter(g => g.asignado).length;
+
+    const card = (lbl, val, sub, color) => `
+        <div class="bg-white rounded-2xl border shadow-sm p-5 text-center" style="border-color:var(--brd);">
+            <p class="text-xs font-black uppercase tracking-widest mb-2" style="color:var(--t3);">${lbl}</p>
+            <p class="font-black text-3xl" style="font-family:'DM Mono',monospace;color:${color};">${val}</p>
+            <p class="text-xs font-semibold mt-1" style="color:var(--t3);">${sub}</p>
+        </div>`;
+    document.getElementById('asSummary').innerHTML =
+        card('Tickets en rango', totalTickets, totalTicketsGlobal !== totalTickets ? `de ${totalTicketsGlobal} totales` : 'en el periodo', 'var(--t1)') +
+        card('Con comercio', matched, 'identificados automáticamente', '#16a34a') +
+        card('Huérfanos', huerfanos.length, 'comercios sin visita POP', '#d97706') +
+        card('Por asignar', sinAsignar, `${yaAsignados} ya asignados`, sinAsignar > 0 ? '#dc2626' : 'var(--t3)');
+
+    const q = (document.getElementById('asSearch').value || '').toLowerCase().trim();
+    let grupos = huerfanos.filter(g => !q || g.nombre.toLowerCase().includes(q));
+    grupos = grupos.sort((a,b) => b.count - a.count);
+
+    const el = document.getElementById('asHuerfanosList');
+    if (!grupos.length) {
+        el.innerHTML = `<div class="bg-white rounded-2xl border p-10 text-center" style="border-color:var(--brd);">
+            <p class="font-bold" style="color:var(--t1);">✅ No hay tickets huérfanos</p>
+            <p class="text-sm mt-1" style="color:var(--t3);">Todos los tickets del rango matchearon un comercio visitado o ya tienen asignación manual.</p>
+        </div>`;
+    } else {
+        el.innerHTML = grupos.map(g => {
+            const sugerido = g.sugerencia;
+            const asignado = g.asignado ? g.asignado.vendedor_asignado : '';
+            const estadoTxt = g.estado || '—';
+            const sel = asignado || sugerido || '';
+            const sugerenciaHtml = sugerido && !asignado
+                ? `<span class="text-xs font-bold px-2 py-1 rounded-lg" style="background:#eff6ff;color:#1d4ed8;border:1px solid #bfdbfe;">💡 Sugerencia: ${sugerido}</span>`
+                : (asignado
+                    ? `<span class="text-xs font-bold px-2 py-1 rounded-lg" style="background:#f0fdf4;color:#16a34a;border:1px solid #bbf7d0;">✅ Asignado a ${asignado}</span>`
+                    : `<span class="text-xs font-semibold" style="color:var(--t3);">Sin sugerencia única</span>`);
+            return `
+            <div class="rounded-2xl border p-4" style="border-color:${asignado ? '#bbf7d0' : '#fde68a'};background:${asignado ? '#f0fdf4' : '#fffbeb'};">
+                <div class="flex items-start justify-between gap-3 flex-wrap">
+                    <div class="min-w-0 flex-1">
+                        <p class="font-black text-sm" style="color:var(--t1);">${g.nombre}</p>
+                        <p class="text-xs mt-0.5" style="color:var(--t3);">
+                            <span style="color:#1d4ed8;font-weight:700;">Estado:</span> ${estadoTxt} ·
+                            <span style="font-family:'DM Mono',monospace;">${g.count} ticket${g.count !== 1 ? 's' : ''}</span>
+                        </p>
+                        <div class="mt-2">${sugerenciaHtml}</div>
+                    </div>
+                    <div class="flex items-center gap-2 flex-wrap">
+                        <select id="asSel_${g.nombreNorm.replace(/[^a-zA-Z0-9]/g, '_')}" class="px-3 py-2 border rounded-xl text-sm bg-white outline-none" style="border-color:var(--brd);min-width:200px;">
+                            ${vendedoresOptions(sel)}
+                        </select>
+                        <button onclick="guardarAsignacionDesdePanel('${g.nombreNorm.replace(/'/g, "\\'")}')"
+                            class="px-3.5 py-2 rounded-xl text-xs font-bold text-white transition active:scale-95"
+                            style="background:var(--accent);">Guardar</button>
+                        ${asignado ? `<button onclick="quitarAsignacion('${g.nombreNorm.replace(/'/g, "\\'")}')"
+                            class="px-3.5 py-2 rounded-xl text-xs font-bold transition active:scale-95"
+                            style="background:#fef2f2;color:#dc2626;border:1px solid #fecaca;">Quitar</button>` : ''}
+                    </div>
+                </div>
+            </div>`;
+        }).join('');
+    }
+
+    renderAsignadas();
+}
+
+function renderAsignadas() {
+    const tbody = document.getElementById('asAsignadasBody');
+    if (!asignacionesData.length) {
+        tbody.innerHTML = '<tr><td colspan="6" class="text-center py-8" style="color:var(--t3);">Aún no hay asignaciones guardadas.</td></tr>';
+        return;
+    }
+    // Contar tickets en rango por establecimiento normalizado
+    const counts = {};
+    ticketsEnRango().forEach(t => {
+        const k = normTxt(t.establecimiento || t.comercio || '');
+        if (k) counts[k] = (counts[k] || 0) + 1;
+    });
+    tbody.innerHTML = asignacionesData.map(a => {
+        const n = counts[_keyAsignacion(a)] || 0;
+        const fec = a.asignado_en || null;
+        const fecTxt = fec ? new Date(fec).toLocaleDateString('es-VE',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '—';
+        return `<tr class="border-t" style="border-color:#f1f5f9;">
+            <td class="px-4 py-3 font-bold text-sm" style="color:var(--t1);">${a.nombre_original || _keyAsignacion(a)}</td>
+            <td class="px-4 py-3 text-xs font-semibold" style="color:#1d4ed8;">${a.estado_comercio || '—'}</td>
+            <td class="px-4 py-3 text-xs font-bold" style="color:var(--t2);">${a.vendedor_asignado || '—'}</td>
+            <td class="px-4 py-3 text-center font-bold" style="color:var(--accent);font-family:'DM Mono',monospace;">${n}</td>
+            <td class="px-4 py-3 text-xs" style="color:var(--t3);">${fecTxt}</td>
+            <td class="px-4 py-3 text-center">
+                <button onclick="quitarAsignacion('${_keyAsignacion(a).replace(/'/g, "\\'")}')"
+                    class="text-xs font-bold px-3 py-1.5 rounded-xl transition"
+                    style="background:#fef2f2;color:#dc2626;border:1px solid #fecaca;">Quitar</button>
+            </td>
+        </tr>`;
+    }).join('');
+}
+
+async function guardarAsignacionDesdePanel(nombreNorm) {
+    const safeId = nombreNorm.replace(/[^a-zA-Z0-9]/g, '_');
+    const selEl = document.getElementById('asSel_' + safeId);
+    if (!selEl) return;
+    const vendedor = selEl.value;
+    if (!vendedor) { alert('Selecciona un vendedor antes de guardar.'); return; }
+    // Buscar el grupo para obtener nombre original y estado
+    const g = (cmData.huerfanos || []).find(h => h.nombreNorm === nombreNorm);
+    const nombreOriginal = g ? g.nombre : nombreNorm;
+    const estado = g ? (g.estado || '') : '';
+    const btn = event ? event.target : null;
+    if (btn) { btn.disabled = true; btn.textContent = 'Guardando...'; }
+    const res = await saveAsignacion(nombreOriginal, vendedor, estado);
+    if (res.error) { alert('Error al guardar la asignación: ' + (res.error.message || 'desconocido')); if (btn) { btn.disabled = false; btn.textContent = 'Guardar'; } return; }
+    // Recalcular todo: las asignaciones cambian el matching
+    computeComercios();
+    renderComercios();
+    renderAsignar();
+}
+
+async function quitarAsignacion(nombreNorm) {
+    if (!confirm('¿Quitar esta asignación manual? Los tickets volverán a ser huérfanos.')) return;
+    const res = await deleteAsignacion(nombreNorm);
+    if (res.error) { alert('Error al borrar la asignación: ' + (res.error.message || 'desconocido')); return; }
+    computeComercios();
+    renderComercios();
+    renderAsignar();
+}
+
+let _asd;
+document.getElementById('asSearch').addEventListener('input', () => { clearTimeout(_asd); _asd = setTimeout(renderAsignar, 250); });
+
+// ═══════════════════════════════════════════════════════════════════════
+// SINCRONIZACIÓN DE FILTROS DE FECHA (Comercios / Sorteo / Asignar)
+// ═══════════════════════════════════════════════════════════════════════
+function _syncInputsFecha() {
+    [['cmFechaDesde','cmFechaHasta'],['srFechaDesde','srFechaHasta'],['asFechaDesde','asFechaHasta']].forEach(([d,h]) => {
+        const de = document.getElementById(d), ha = document.getElementById(h);
+        if (de && de.value !== fechaDesde) de.value = fechaDesde;
+        if (ha && ha.value !== fechaHasta) ha.value = fechaHasta;
+    });
+    const info = (fechaDesde || fechaHasta)
+        ? `Rango: ${fechaDesde || '—'} → ${fechaHasta || '—'}`
+        : 'Sin filtro de fecha (toda la data)';
+    ['cmRangoInfo','srRangoInfo'].forEach(id => { const e = document.getElementById(id); if (e) e.textContent = info; });
+}
+
+function setRangoFechas(desde, hasta) {
+    fechaDesde = desde || '';
+    fechaHasta = hasta || '';
+    _syncInputsFecha();
+    onRangoFechasTickets();
+}
+
+function limpiarRangoFechas() {
+    setRangoFechas('', '');
+}
+
+['cmFechaDesde','cmFechaHasta','srFechaDesde','srFechaHasta','asFechaDesde','asFechaHasta'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener('change', (ev) => {
+        // Determinar si el input cambiado es "desde" o "hasta" y leer su par
+        // desde el mismo grupo (todos los grupos están sincronizados).
+        const changedId = ev.target.id;
+        const isDesde = changedId.endsWith('FechaDesde');
+        const newDesde = isDesde ? ev.target.value : (fechaDesde || '');
+        const newHasta = !isDesde ? ev.target.value : (fechaHasta || '');
+        setRangoFechas(newDesde, newHasta);
+    });
+});
+
+// ═══════════════════════════════════════════════════════════════════════
+// EXPORTACIÓN A EXCEL (SheetJS)
+// ═══════════════════════════════════════════════════════════════════════
+function _downloadWorkbook(wb, filename) {
+    if (typeof XLSX === 'undefined') { alert('Librería Excel no disponible.'); return; }
+    XLSX.writeFile(wb, filename);
+}
+
+function _safeSheetName(name) {
+    return (name || 'Hoja').replace(/[\\/?*[\]:]/g, '_').slice(0, 28);
+}
+
+// Construye una hoja "Periodo" con el rango de fechas activo y la fecha
+// de generación. Devuelve un array de filas listo para json_to_sheet.
+function _filasPeriodo() {
+    const ahora = new Date();
+    const fecGen = ahora.toLocaleString('es-VE', { dateStyle: 'long', timeStyle: 'short' });
+    const desdeTxt = fechaDesde || '(sin límite inferior)';
+    const hastaTxt = fechaHasta || '(sin límite superior)';
+    const ticketsRango = (typeof ticketsEnRango === 'function') ? ticketsEnRango().length : 0;
+    const ticketsGlobal = (typeof sorteoTicketsData !== 'undefined') ? sorteoTicketsData.length : 0;
+    return [
+        { 'Campo': 'Fecha de generación', 'Valor': fecGen },
+        { 'Campo': 'Rango desde', 'Valor': desdeTxt },
+        { 'Campo': 'Rango hasta', 'Valor': hastaTxt },
+        { 'Campo': 'Tickets en rango', 'Valor': ticketsRango },
+        { 'Campo': 'Tickets totales (sin filtro)', 'Valor': ticketsGlobal },
+        { 'Campo': 'Filtro aplicado', 'Valor': (fechaDesde || fechaHasta) ? 'Sí' : 'No (toda la data)' }
+    ];
+}
+
+// Añade la hoja "Periodo" como PRIMERA hoja del workbook.
+function _prependHojaPeriodo(wb) {
+    const ws = XLSX.utils.json_to_sheet(_filasPeriodo());
+    XLSX.utils.book_append_sheet(wb, ws, _safeSheetName('Periodo'));
+    // Mover la hoja "Periodo" (última añadida) a la posición 0
+    const idx = wb.SheetNames.length - 1;
+    const name = wb.SheetNames[idx];
+    wb.SheetNames.splice(idx, 1);
+    wb.SheetNames.unshift(name);
+}
+
+// Construye el sufijo del nombre de archivo según el rango activo.
+function _sufijoRango() {
+    if (!fechaDesde && !fechaHasta) return 'toda_la_data';
+    const d = fechaDesde || 'inicio';
+    const h = fechaHasta || 'hoy';
+    return `${d}_a_${h}`;
+}
+
+function exportarComerciosExcel() {
+    if (!cmData) return;
+    if (typeof XLSX === 'undefined') { alert('Librería Excel no disponible.'); return; }
+    const wb = XLSX.utils.book_new();
+
+    // ── Hoja 1: Vendedores (ranking de vendedores por tickets) ───────
+    const vmap = {};
+    cmData.canon.forEach(c => {
+        if (!vmap[c.vendedor]) vmap[c.vendedor] = { nombre: c.vendedor, tickets: 0, aprob: 0, materiales: 0, unicos: 0, comercios: 0 };
+        const v = vmap[c.vendedor];
+        v.tickets += c.tickets; v.aprob += c.ticketsAprob; v.materiales += c.materiales; v.unicos += c.unicos; v.comercios++;
+    });
+    const vendRows = Object.values(vmap)
+        .sort((a,b) => b.tickets - a.tickets || b.unicos - a.unicos)
+        .map((v, i) => ({
+            '#': i + 1,
+            'Vendedor': v.nombre,
+            'Comercios': v.comercios,
+            'Tickets': v.tickets,
+            'Aprobados': v.aprob,
+            'POP unico total': v.unicos,
+            'Materiales totales': v.materiales,
+            'Efectividad (tickets/POP)': v.unicos > 0 ? (v.tickets / v.unicos).toFixed(2) : '—'
+        }));
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(vendRows), _safeSheetName('Vendedores'));
+
+    // ── Hoja 2: Comercios (POP vs Tickets, respetando búsqueda) ──────
+    const q = (document.getElementById('cmSearch').value || '').toLowerCase().trim();
+    let rows = cmData.canon.filter(c =>
+        !q || c.nombre.toLowerCase().includes(q) || (c.vendedor || '').toLowerCase().includes(q));
+    rows = rows.sort((a,b) => b.tickets - a.tickets || b.unicos - a.unicos);
+    const comRows = rows.map((c, i) => ({
+        '#': i + 1,
+        'Comercio': c.nombre,
+        'Vendedor': c.vendedor,
+        'Estado': c.estado,
+        'POP (de 5)': c.unicos,
+        'Tickets': c.tickets,
+        'Aprobados': c.ticketsAprob,
+        'Tickets/POP': c.unicos > 0 ? (c.tickets / c.unicos).toFixed(2) : '—',
+        'Origen': c.origen || 'visita',
+        'Visitas POP': c.visitas
+    }));
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(comRows), _safeSheetName('Comercios'));
+
+    // ── Hoja 3: Oportunidades (POP colocado, 0 tickets) ──────────────
+    const opp = cmData.canon
+        .filter(c => c.unicos >= 2 && c.tickets === 0)
+        .sort((a,b) => b.unicos - a.unicos || b.visitas - a.visitas);
+    const oppRows = opp.map((c, i) => ({
+        '#': i + 1,
+        'Comercio': c.nombre,
+        'Vendedor': c.vendedor,
+        'Estado': c.estado,
+        'POP (de 5)': c.unicos,
+        'Visitas POP': c.visitas
+    }));
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(oppRows), _safeSheetName('Oportunidades'));
+
+    // ── Hoja 4: Detalle por vendedor (cada comercio de cada vendedor) ─
+    const detalleRows = [];
+    Object.values(vmap)
+        .sort((a,b) => b.tickets - a.tickets || b.unicos - a.unicos)
+        .forEach((v, vi) => {
+            const coms = cmData.canon.filter(c => c.vendedor === v.nombre)
+                .sort((a,b) => b.tickets - a.tickets || b.unicos - a.unicos);
+            coms.forEach((c, ci) => {
+                detalleRows.push({
+                    'Vendedor': v.nombre,
+                    'Posición vendedor': vi + 1,
+                    'Comercio': c.nombre,
+                    'Estado': c.estado,
+                    'POP (de 5)': c.unicos,
+                    'Tickets': c.tickets,
+                    'Aprobados': c.ticketsAprob,
+                    'Tickets/POP': c.unicos > 0 ? (c.tickets / c.unicos).toFixed(2) : '—',
+                    'Origen': c.origen || 'visita'
+                });
+            });
+        });
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(detalleRows), _safeSheetName('Detalle x Vendedor'));
+
+    _prependHojaPeriodo(wb);
+    _downloadWorkbook(wb, `tickets_x_comercio_${_sufijoRango()}.xlsx`);
+}
+
+function exportarSorteoExcel() {
+    const tickets = ticketsEnRango();
+    const data = tickets.map(t => ({
+        'ID': t.id,
+        'Creado en': t.creado_en || '',
+        'Establecimiento': t.establecimiento || t.comercio || '',
+        'Estado ticket': t.estado || '',
+        'Estado comercio': t.estado_comercio || '',
+        'Es ganador': t.es_ganador ? 'Sí' : 'No'
+    }));
+    const ws = XLSX.utils.json_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, _safeSheetName('Tickets'));
+    _prependHojaPeriodo(wb);
+    _downloadWorkbook(wb, `tickets_sorteo_${_sufijoRango()}.xlsx`);
+}
+
+function exportarHuerfanosExcel() {
+    if (!cmData) return;
+    const data = (cmData.huerfanos || []).map(g => ({
+        'Establecimiento': g.nombre,
+        'Estado': g.estado || '',
+        'Tickets': g.count,
+        'Sugerencia': g.sugerencia || '',
+        'Vendedor asignado': g.asignado ? g.asignado.vendedor_asignado : ''
+    }));
+    const ws = XLSX.utils.json_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, _safeSheetName('Huerfanos'));
+    _prependHojaPeriodo(wb);
+    _downloadWorkbook(wb, `tickets_huerfanos_${_sufijoRango()}.xlsx`);
+}
 
 // ─── Init Bootstrap ────────────────────────────────────────────────────────
 loadAll();
