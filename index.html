@@ -2012,12 +2012,17 @@ function computeComercios() {
     // ya visitado, o (b) crear un comercio "virtual" para un establecimiento
     // que nunca recibió visita POP pero sí vende tickets.
     (asignacionesData || []).forEach(a => {
+        // Si hay filtro de estado, solo incluir asignaciones que coincidan con ese estado
+        // (o que no tengan estado_comercio definido, para no perder asignaciones sin estado)
+        if (filtroEstado && a.estado_comercio && a.estado_comercio !== filtroEstado) return;
         const key = _keyAsignacion(a);
         if (!key) return;
+        // Si la asignación no tenía estado pero estamos filtrando, heredar el estado del filtro
+        const estAsign = a.estado_comercio || (filtroEstado || '—');
         if (!canonMap[key]) {
             canonMap[key] = {
                 key, nombre: a.nombre_original || key,
-                estado: a.estado_comercio || '—',
+                estado: estAsign,
                 visitas: 0, materiales: 0, matSet: new Set(),
                 vendCount: {}, tickets: 0, ticketsAprob: 0,
                 origen: 'asignacion'
