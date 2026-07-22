@@ -373,6 +373,12 @@
             </div>
             <button onclick="limpiarRangoFechas()" class="px-4 py-2 rounded-xl text-xs font-bold border transition"
                 style="border-color:var(--brd);color:var(--t2);background:#fff;">Limpiar fechas</button>
+            <select id="cmFilterEstado" onchange="onCmFilterChange()" class="px-3 py-2 border rounded-xl text-sm outline-none bg-white appearance-none" style="border-color:var(--brd);">
+                <option value="">Todos los estados</option>
+            </select>
+            <select id="cmFilterVendedor" onchange="onCmFilterChange()" class="px-3 py-2 border rounded-xl text-sm outline-none bg-white appearance-none" style="border-color:var(--brd);">
+                <option value="">Todos los vendedores</option>
+            </select>
             <p id="cmRangoInfo" class="text-xs font-semibold ml-auto self-center" style="color:var(--t3);"></p>
         </div>
     </div>
@@ -382,6 +388,23 @@
         <div class="skeleton h-24 rounded-2xl"></div>
         <div class="skeleton h-24 rounded-2xl"></div>
         <div class="skeleton h-24 rounded-2xl"></div>
+    </div>
+
+    <div id="cmEstadosxVendedor" class="bg-white rounded-2xl border shadow-sm mb-5 overflow-hidden" style="border-color:var(--brd);">
+        <div class="flex items-center justify-between px-5 py-4 flex-wrap gap-2" style="border-bottom:1px solid var(--brd);">
+            <div class="flex items-center gap-2">
+                <span class="text-xl">🗺️</span>
+                <p class="font-black text-base" style="color:var(--t1);">Tickets por Estado · Desglose por Vendedor</p>
+            </div>
+            <button onclick="exportarComerciosExcel()" class="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition active:scale-95"
+                style="background:#f0fdf4;color:#16a34a;border:1px solid #bbf7d0;">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                Exportar Excel
+            </button>
+        </div>
+        <div id="cmEstadosVendContent" class="p-5 space-y-4">
+            <div class="skeleton h-16 rounded-2xl"></div>
+        </div>
     </div>
 
     <div class="bg-white rounded-2xl border shadow-sm mb-5 overflow-hidden" style="border-color:var(--brd);">
@@ -567,6 +590,9 @@
             </div>
             <button onclick="limpiarRangoFechas()" class="px-4 py-2 rounded-xl text-xs font-bold border transition"
                 style="border-color:var(--brd);color:var(--t2);background:#fff;">Limpiar fechas</button>
+            <select id="srFilterVendedor" onchange="onSrFilterChange()" class="px-3 py-2 border rounded-xl text-sm outline-none bg-white appearance-none" style="border-color:var(--brd);">
+                <option value="">Todos los vendedores</option>
+            </select>
             <button onclick="exportarSorteoExcel()" class="flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-bold transition active:scale-95"
                 style="background:#f0fdf4;color:#16a34a;border:1px solid #bbf7d0;" title="Exportar tickets del rango a Excel">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
@@ -588,7 +614,7 @@
         
         <div class="bg-white rounded-2xl border shadow-sm p-5 flex flex-col" style="border-color:var(--brd);">
             <p class="text-xs font-black uppercase tracking-widest mb-4" style="color:var(--t3);">Ranking por Estado</p>
-            <div id="estadosSorteoRanking" class="space-y-4 overflow-y-auto pr-2" style="max-height: 250px;">
+            <div id="estadosSorteoRanking" class="space-y-4 pr-2">
                 </div>
         </div>
     </div>
@@ -946,7 +972,15 @@ async function loadSorteo() {
 
 // Re-renderiza stats y charts del tab Sorteo aplicando el rango de fechas.
 function refrescarSorteo() {
-    const tickets = ticketsEnRango();
+    let tickets = ticketsEnRango();
+    // Aplicar filtro de vendedor en Sorteo
+    const srVen = document.getElementById('srFilterVendedor');
+    if (srVen && srVen.value) {
+        tickets = tickets.filter(t => {
+            const v = getVendedorTicket(t);
+            return v && v.toUpperCase().trim() === srVen.value;
+        });
+    }
     renderSorteoStats(tickets);
     renderSorteoCharts(tickets);
 }
@@ -1218,6 +1252,24 @@ function populateEstados() {
     const sel = document.getElementById('filterEstado');
     sel.innerHTML = '<option value="">Todos los estados</option>';
     estados.forEach(e => { const o = document.createElement('option'); o.value = o.textContent = e; sel.appendChild(o); });
+    // También llenar el dropdown de estados en Tickets x Comercio
+    const cmSel = document.getElementById('cmFilterEstado');
+    if (cmSel) {
+        cmSel.innerHTML = '<option value="">Todos los estados</option>';
+        estados.forEach(e => { const o = document.createElement('option'); o.value = o.textContent = e; cmSel.appendChild(o); });
+    }
+    // Llenar el dropdown de vendedores en Tickets x Comercio
+    const cmVen = document.getElementById('cmFilterVendedor');
+    if (cmVen) {
+        cmVen.innerHTML = '<option value="">Todos los vendedores</option>';
+        TODOS_LOS_VENDEDORES.forEach(v => { const o = document.createElement('option'); o.value = o.textContent = v; cmVen.appendChild(o); });
+    }
+    // Llenar el dropdown de vendedores en Sorteo
+    const srVen = document.getElementById('srFilterVendedor');
+    if (srVen) {
+        srVen.innerHTML = '<option value="">Todos los vendedores</option>';
+        TODOS_LOS_VENDEDORES.forEach(v => { const o = document.createElement('option'); o.value = o.textContent = v; srVen.appendChild(o); });
+    }
 }
 
 // ─── Apply filters ────────────────────────────────────────────────────────
@@ -2096,6 +2148,52 @@ function cmDots(c) {
 }
 function cmCob(c) { return c.unicos + '/5'; }
 
+function renderCmEstadosXVendedor() {
+    if (!cmData) return;
+    const el = document.getElementById('cmEstadosVendContent');
+    if (!el) return;
+    const { canon } = cmData;
+    // Agrupar por estado -> vendedor -> {tickets, aprob}
+    const estMap = {};
+    canon.forEach(c => {
+        const e = c.estado || '—';
+        const v = c.vendedor || 'SIN VENDEDOR';
+        if (!estMap[e]) estMap[e] = {};
+        if (!estMap[e][v]) estMap[e][v] = { tickets: 0, aprob: 0 };
+        estMap[e][v].tickets += c.tickets;
+        estMap[e][v].aprob += c.ticketsAprob;
+    });
+    const estados = Object.entries(estMap)
+        .map(([est, vmap]) => {
+            const total = Object.values(vmap).reduce((s, v) => s + v.tickets, 0);
+            return { est, total, vmap };
+        })
+        .sort((a, b) => b.total - a.total);
+    if (!estados.length) {
+        el.innerHTML = '<p class="text-sm text-center py-4" style="color:var(--t3);">Sin datos de tickets por estado.</p>';
+        return;
+    }
+    el.innerHTML = estados.map(({ est, total, vmap }) => {
+        const vens = Object.entries(vmap).sort((a, b) => b[1].tickets - a[1].tickets);
+        const pctTotal = cmData.totalTickets > 0 ? Math.round((total / cmData.totalTickets) * 100) : 0;
+        const detalle = vens.map(([v, d]) =>
+            `<span class="text-xs font-semibold px-2 py-0.5 rounded-lg" style="background:#f1f5f9;color:var(--t2);">${v}: <b style="font-family:'DM Mono',monospace;">${d.tickets}</b></span>`
+        ).join(' ');
+        const maxBar = Math.round((total / (estados[0]?.total || 1)) * 100);
+        return `<div>
+            <div class="flex items-center gap-3 mb-1">
+                <span class="text-xs font-black w-28 shrink-0 truncate" style="color:var(--t1);">${est}</span>
+                <div class="flex-1 rounded-full overflow-hidden" style="height:16px;background:#f1f5f9;">
+                    <div class="h-full rounded-full transition-all duration-700" style="width:${maxBar}%;background:var(--accent);"></div>
+                </div>
+                <span class="text-sm font-black w-12 text-right shrink-0" style="font-family:'DM Mono',monospace;color:var(--t1);">${total}</span>
+                <span class="text-xs w-10 text-right shrink-0" style="color:var(--t3);">${pctTotal}%</span>
+            </div>
+            <div class="flex flex-wrap gap-1.5 ml-32 mb-2">${detalle}</div>
+        </div>`;
+    }).join('');
+}
+
 function renderComercios() {
     if (!cmData) return;
     const { canon, unmatched, matched, totalTickets, totalTicketsGlobal } = cmData;
@@ -2197,6 +2295,7 @@ function renderComercios() {
             </div>`).join('')
         : '<p class="text-sm sm:col-span-2 lg:col-span-3" style="color:#16a34a;">✅ No hay comercios con POP colocado y cero tickets. ¡Buen balance!</p>';
 
+    renderCmEstadosXVendedor();
     renderCmTable();
     document.getElementById('cmUnmatchedCount').textContent = `${sinMatch} ticket${sinMatch !== 1 ? 's' : ''}`;
     document.getElementById('cmUnmatched').innerHTML = unmatched.length
@@ -2239,6 +2338,39 @@ document.getElementById('vendSearch').addEventListener('input', () => { clearTim
 document.getElementById('vendSelect').addEventListener('change', renderVendedoresDetail);
 let _cmd;
 document.getElementById('cmSearch').addEventListener('input', () => { clearTimeout(_cmd); _cmd = setTimeout(renderCmTable, 250); });
+
+// ─── Filtros Tickets x Comercio ───────────────────────────────────────────────
+function onCmFilterChange() {
+    computeComercios();
+    renderComercios();
+}
+
+// ─── Filtro Vendedor en Sorteo ────────────────────────────────────────────────
+function onSrFilterChange() {
+    refrescarSorteo();
+}
+
+// ─── Helper: obtiene el vendedor asociado a un ticket usando cmData ───────────
+function getVendedorTicket(t) {
+    if (!cmData) return null;
+    const est = (t.establecimiento || t.comercio || '').toString();
+    const estNorm = normTxt(est);
+    // Buscar en asignaciones manuales
+    if (asignacionesMap[estNorm] && canonMapForVendor && canonMapForVendor[estNorm]) {
+        return canonMapForVendor[estNorm].vendedor;
+    }
+    // Buscar en canon por matching difuso
+    let best = null, bs = 0;
+    for (const c of cmData.canon) {
+        const sc = simScore(est, c.nombre);
+        if (sc > bs) { bs = sc; best = c; }
+    }
+    if (best && bs >= CM_MATCH_THRESHOLD) return best.vendedor;
+    return null;
+}
+
+// Referencia al canonMap para uso rápido
+let canonMapForVendor = null;
 
 // ═══════════════════════════════════════════════════════════════════════
 // TAB: ASIGNAR TICKETS (huérfanos + asignaciones manuales)
