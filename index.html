@@ -878,6 +878,17 @@ function switchTab(tab) {
 // ─── Load all ─────────────────────────────────────────────────────────────
 async function loadAll() {
     spinRefresh(true);
+    // Setear fechas por defecto: primer día del mes actual → hoy
+    const hoy = new Date();
+    const primerDia = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
+    const hoyStr = hoy.toLocaleDateString('en-CA'); // YYYY-MM-DD
+    const primerStr = primerDia.toLocaleDateString('en-CA'); // YYYY-MM-DD
+    // Solo setear si no hay fecha ya definida (evita sobrescribir en refrescos)
+    if (!fechaDesde && !fechaHasta) {
+        fechaDesde = primerStr;
+        fechaHasta = hoyStr;
+    }
+    _syncInputsFecha();
     // Carga en paralelo: registros POP, tickets y asignaciones manuales.
     // Antes se hacía secuencial (loadPop → loadSorteo) lo que duplicaba el
     // tiempo total de carga. Ahora ambas peticiones viajan a la vez.
@@ -1969,8 +1980,17 @@ function simScore(a, b) {
 }
 
 function computeComercios() {
+    // ── Leer filtros de estado/vendedor de la UI ──────────────────────
+    const cmEst = document.getElementById('cmFilterEstado');
+    const cmVen = document.getElementById('cmFilterVendedor');
+    const filtroEstado = cmEst ? cmEst.value : '';
+    const filtroVendedor = cmVen ? cmVen.value : '';
+
     const canonMap = {};
     allData.forEach(r => {
+        // Aplicar filtro de estado y vendedor si están seleccionados
+        if (filtroEstado && r.estado !== filtroEstado) return;
+        if (filtroVendedor && r.promotor_nombre && r.promotor_nombre.toUpperCase().trim() !== filtroVendedor) return;
         const key = normTxt(r.cliente_nombre);
         if (!key) return;
         if (!canonMap[key]) canonMap[key] = {
