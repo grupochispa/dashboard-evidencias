@@ -1987,10 +1987,13 @@ function computeComercios() {
     const filtroVendedor = cmVen ? cmVen.value : '';
 
     const canonMap = {};
+    const feNorm = filtroEstado ? filtroEstado.trim().toUpperCase() : '';
+    const fvNorm = filtroVendedor ? filtroVendedor.trim().toUpperCase() : '';
     allData.forEach(r => {
-        // Aplicar filtro de estado y vendedor si están seleccionados
-        if (filtroEstado && r.estado !== filtroEstado) return;
-        if (filtroVendedor && r.promotor_nombre && r.promotor_nombre.toUpperCase().trim() !== filtroVendedor) return;
+        // Aplicar filtro de estado y vendedor si están seleccionados (case-insensitive)
+        // Si no tiene estado definido, se excluye cuando hay filtro de estado activo
+        if (feNorm && (!r.estado || r.estado.trim().toUpperCase() !== feNorm)) return;
+        if (fvNorm && (!r.promotor_nombre || r.promotor_nombre.toUpperCase().trim() !== fvNorm)) return;
         const key = normTxt(r.cliente_nombre);
         if (!key) return;
         if (!canonMap[key]) canonMap[key] = {
@@ -2012,13 +2015,15 @@ function computeComercios() {
     // ya visitado, o (b) crear un comercio "virtual" para un establecimiento
     // que nunca recibió visita POP pero sí vende tickets.
     (asignacionesData || []).forEach(a => {
-        // Si hay filtro de estado, solo incluir asignaciones que coincidan con ese estado
-        // (o que no tengan estado_comercio definido, para no perder asignaciones sin estado)
-        if (filtroEstado && a.estado_comercio && a.estado_comercio !== filtroEstado) return;
+        // Si hay filtro de estado activo, solo incluir asignaciones cuyo estado_comercio coincida (case-insensitive)
+        // Si la asignación no tiene estado_comercio, se excluye cuando hay filtro (no sabemos de qué estado es)
+        if (feNorm) {
+            if (!a.estado_comercio) return; // sin estado, no se puede saber si pertenece al filtro
+            if (a.estado_comercio.trim().toUpperCase() !== feNorm) return;
+        }
         const key = _keyAsignacion(a);
         if (!key) return;
-        // Si la asignación no tenía estado pero estamos filtrando, heredar el estado del filtro
-        const estAsign = a.estado_comercio || (filtroEstado || '—');
+        const estAsign = a.estado_comercio || '—';
         if (!canonMap[key]) {
             canonMap[key] = {
                 key, nombre: a.nombre_original || key,
