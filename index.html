@@ -907,6 +907,8 @@ function switchTab(tab) {
     });
     document.getElementById('statsPopBanner').classList.toggle('hidden', tab === 'sorteo');
     document.getElementById('statsSorteoBanner').classList.toggle('hidden', tab !== 'sorteo');
+    // Al cambiar al tab Sorteo, refrescar para que tome los filtros de fecha/estado/vendedor activos
+    if (tab === 'sorteo') refrescarSorteo();
 }
 
 // ─── Load all ─────────────────────────────────────────────────────────────
@@ -1157,21 +1159,27 @@ async function deleteAsignacion(nombreNorm) {
 function renderSorteoCharts(tickets) {
     if(!tickets.length) return;
 
-    // 1. Ranking por Estado de origen del ticket
+    // 1. Ranking por Estado de origen del ticket (usa cmData para consistencia con Tickets x Comercio)
     const estadosCount = {};
-    tickets.forEach(t => {
-        let est = t.estado_comercio;
-        
-        if (!est) {
-            const popMatch = allData.find(p => p.cliente_nombre && t.establecimiento && p.cliente_nombre.toLowerCase().trim() === t.establecimiento.toLowerCase().trim());
-            if (popMatch && popMatch.estado) {
-                est = popMatch.estado;
+    if (cmData && cmData.canon) {
+        // Agregar tickets por estado desde el canon (mismo cálculo que Tickets x Comercio)
+        cmData.canon.forEach(c => {
+            const est = c.estado || 'No Definido';
+            estadosCount[est] = (estadosCount[est] || 0) + c.tickets;
+        });
+    }
+    // Si no hay cmData (poco probable), caer al método anterior
+    if (!cmData || !cmData.canon) {
+        tickets.forEach(t => {
+            let est = t.estado_comercio;
+            if (!est) {
+                const popMatch = allData.find(p => p.cliente_nombre && t.establecimiento && p.cliente_nombre.toLowerCase().trim() === t.establecimiento.toLowerCase().trim());
+                if (popMatch && popMatch.estado) est = popMatch.estado;
             }
-        }
-        
-        est = est ? est.trim() : 'No Definido';
-        estadosCount[est] = (estadosCount[est] || 0) + 1;
-    });
+            est = est ? est.trim() : 'No Definido';
+            estadosCount[est] = (estadosCount[est] || 0) + 1;
+        });
+    }
 
     const estadosArr = Object.entries(estadosCount).sort((a,b) => b[1] - a[1]);
     const rankingContainer = document.getElementById('estadosSorteoRanking');
