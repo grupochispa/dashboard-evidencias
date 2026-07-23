@@ -1018,12 +1018,33 @@ async function loadSorteo() {
 // Re-renderiza stats y charts del tab Sorteo aplicando el rango de fechas.
 function refrescarSorteo() {
     let tickets = ticketsEnRango();
-    // Aplicar filtro de vendedor en Sorteo
-    const srVen = document.getElementById('srFilterVendedor');
-    if (srVen && srVen.value) {
+    // ── Aplicar mismo filtro de estado que Tickets x Comercio ───────
+    const cmEst = document.getElementById('cmFilterEstado');
+    const fltEstado = cmEst ? cmEst.value : '';
+    if (fltEstado) {
         tickets = tickets.filter(t => {
             const v = getVendedorTicket(t);
-            return v && v.toUpperCase().trim() === srVen.value;
+            if (v) {
+                // Buscar el estado de este vendedor en los datos POP
+                const reg = allData.find(r => r.promotor_nombre && r.promotor_nombre.toUpperCase().trim() === v.toUpperCase().trim() && r.estado);
+                return reg && reg.estado === fltEstado;
+            }
+            // Si el ticket tiene estado_comercio, usarlo como fallback
+            if (t.estado_comercio) return t.estado_comercio.trim() === fltEstado;
+            return false;
+        });
+    }
+    // ── Aplicar filtro de vendedor (si no está ya en cmFilterVendedor) ──
+    const cmVenEl = document.getElementById('cmFilterVendedor');
+    const cmVenVal = cmVenEl ? cmVenEl.value : '';
+    const srVen = document.getElementById('srFilterVendedor');
+    const srVenVal = srVen ? srVen.value : '';
+    const filtroVend = srVenVal || cmVenVal;
+    if (filtroVend) {
+        const fvNorm = filtroVend.trim().toUpperCase();
+        tickets = tickets.filter(t => {
+            const v = getVendedorTicket(t);
+            return v && v.toUpperCase().trim() === fvNorm;
         });
     }
     renderSorteoStats(tickets);
